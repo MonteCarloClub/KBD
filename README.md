@@ -1,2 +1,2 @@
-# HCTxPool
-自主可控链交易池
+# KDB(KanBanData)
+自主可控链数据库事务管理
