@@ -2,14 +2,18 @@
 自主可控链数据库事务管理
 
 数据库接口 KBD/kdb
-NewLDBDatabase 创建数据库
+使用了github.com/syndtr/goleveldb/leveldb的leveldb封装
 
-Put 入数据
+# Installation
+
+`go get github.com/MonteCarloClub/KBD/kdb`
+
+OpenDatabase 创建\打开数据库
+
+Put 写入数据
 
 Get 获取数据
 
 Delete 删除数据
 
-Flush 
-
-Close()
+Close 关闭数据库

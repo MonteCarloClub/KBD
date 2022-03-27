@@ -22,7 +22,7 @@ type LDBDatabase struct {
 	quit chan struct{}
 }
 
-func NewLDBDatabase(file string) (*LDBDatabase, error) {
+func OpenDatabase(file string) (*LDBDatabase, error) {
 	// Open the db
 	db, err := leveldb.OpenFile(file, nil)
 	if err != nil {
