@@ -1,9 +1,9 @@
 package kdb
 
 import (
+	"KBD/common/logger"
+	"KBD/common/logger/glog"
 	"KBD/compression/rle"
-	"KBD/logger"
-	"KBD/logger/glog"
 	"sync"
 	"time"
 
@@ -49,14 +49,6 @@ func (self *LDBDatabase) Put(key []byte, value []byte) {
 	defer self.mu.Unlock()
 
 	self.queue[string(key)] = value
-	/*
-		value = rle.Compress(value)
-
-		err := self.db.Put(key, value, nil)
-		if err != nil {
-			fmt.Println("Error put", err)
-		}
-	*/
 }
 
 func (self *LDBDatabase) Get(key []byte) ([]byte, error) {
