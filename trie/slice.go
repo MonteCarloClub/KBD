@@ -1,8 +1,3 @@
-/**
- * @Author Oliver
- * @Date 2/27/22
- **/
-
 package trie
 
 import (
