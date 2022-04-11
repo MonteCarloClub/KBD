@@ -6,12 +6,13 @@
 package trie
 
 import (
-	"KBD/common"
-	"KBD/crypto/sha3"
 	"bytes"
 	"container/list"
 	"fmt"
 	"sync"
+
+	"KBD/common"
+	"KBD/crypto/sha3"
 )
 
 func ParanoiaCheck(t1 *Trie, backend Backend) (bool, *Trie) {

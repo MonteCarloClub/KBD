@@ -1,6 +1,6 @@
 package trie
 
-import "github.com/ethereum/go-ethereum/common"
+import "KBD/common"
 
 type ValueNode struct {
 	trie *Trie

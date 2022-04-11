@@ -1,14 +1,15 @@
 package kdb
 
 import (
-	"KBD/common/logger"
-	"KBD/common/logger/glog"
-	"KBD/compression/rle"
 	"sync"
 	"time"
 
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
+
+	"KBD/common/logger"
+	"KBD/common/logger/glog"
+	"KBD/compression/rle"
 )
 
 type LDBDatabase struct {
