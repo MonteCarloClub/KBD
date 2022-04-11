@@ -51,7 +51,7 @@ func (s *StateSuite) TestDump() {
     }
 }`
 	if got != want {
-		fmt.Println("dump mismatch:\ngot: %s\nwant: %s\n", got, want)
+		fmt.Printf("dump mismatch:\ngot: %s\nwant: %s\n", got, want)
 	}
 }
 
