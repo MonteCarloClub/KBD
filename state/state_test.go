@@ -1,7 +1,7 @@
 package state
 
 import (
-	"fmt"
+	checker "gopkg.in/check.v1"
 	"math/big"
 	"testing"
 
@@ -13,9 +13,11 @@ type StateSuite struct {
 	state *StateDB
 }
 
+var _ = checker.Suite(&StateSuite{})
+
 var toAddr = common.BytesToAddress
 
-func (s *StateSuite) TestDump() {
+func (s *StateSuite) TestDump(c *checker.C) {
 	return
 	// generate a few entries
 	obj1 := s.state.GetOrNewStateObject(toAddr([]byte{0x01}))
@@ -51,11 +53,11 @@ func (s *StateSuite) TestDump() {
     }
 }`
 	if got != want {
-		fmt.Printf("dump mismatch:\ngot: %s\nwant: %s\n", got, want)
+		c.Errorf("dump mismatch:\ngot: %s\nwant: %s\n", got, want)
 	}
 }
 
-func (s *StateSuite) SetUpTest() {
+func (s *StateSuite) SetUpTest(c *checker.C) {
 	db, _ := kdb.NewMemDatabase()
 	s.state = New(common.Hash{}, db)
 }
@@ -74,7 +76,7 @@ func TestNull(t *testing.T) {
 	value = state.GetState(address, common.Hash{})
 }
 
-func (s *StateSuite) TestSnapshot() {
+func (s *StateSuite) TestSnapshot(c *checker.C) {
 	stateobjaddr := toAddr([]byte("aa"))
 	storageaddr := common.Big("0")
 	data1 := common.NewValue(42)
@@ -98,5 +100,6 @@ func (s *StateSuite) TestSnapshot() {
 	stateObject = s.state.GetStateObject(stateobjaddr)
 	// get state storage value
 	res := stateObject.GetStorage(storageaddr)
-	fmt.Println(res)
+
+	c.Assert(data1, checker.DeepEquals, res)
 }
