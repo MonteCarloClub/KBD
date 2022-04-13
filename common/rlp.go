@@ -177,7 +177,7 @@ func Encode(object interface{}) []byte {
 	return buff.Bytes()
 }
 
-// TODO Use a bytes.Buffer instead of a raw byte slice.
+// Decode TODO Use a bytes.Buffer instead of a raw byte slice.
 // Cleaner code, and use draining instead of seeking the next bytes to read
 func Decode(data []byte, pos uint64) (interface{}, uint64) {
 	var slice []interface{}

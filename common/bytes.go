@@ -9,6 +9,28 @@ import (
 	"strings"
 )
 
+func ToHex(b []byte) string {
+	hex := Bytes2Hex(b)
+	// Prefer output of "0x0" instead of "0x"
+	if len(hex) == 0 {
+		hex = "0"
+	}
+	return "0x" + hex
+}
+
+func FromHex(s string) []byte {
+	if len(s) > 1 {
+		if s[0:2] == "0x" {
+			s = s[2:]
+		}
+		if len(s)%2 == 1 {
+			s = "0" + s
+		}
+		return Hex2Bytes(s)
+	}
+	return nil
+}
+
 type Bytes []byte
 
 func (self Bytes) String() string {
@@ -84,17 +106,6 @@ func ReadVarInt(buff []byte) (ret uint64) {
 	return
 }
 
-// Binary length
-//
-// Returns the true binary length of the given number
-func BinaryLength(num int) int {
-	if num == 0 {
-		return 0
-	}
-
-	return 1 + BinaryLength(num>>8)
-}
-
 // Copy bytes
 //
 // Returns an exact copy of the provided bytes
@@ -103,6 +114,11 @@ func CopyBytes(b []byte) (copiedBytes []byte) {
 	copy(copiedBytes, b)
 
 	return
+}
+
+func HasHexPrefix(str string) bool {
+	l := len(str)
+	return l >= 2 && str[0:2] == "0x"
 }
 
 func IsHex(str string) bool {
@@ -118,6 +134,23 @@ func Hex2Bytes(str string) []byte {
 	h, _ := hex.DecodeString(str)
 
 	return h
+}
+
+func Hex2BytesFixed(str string, flen int) []byte {
+
+	h, _ := hex.DecodeString(str)
+	if len(h) == flen {
+		return h
+	} else {
+		if len(h) > flen {
+			return h[len(h)-flen : len(h)]
+		} else {
+			hh := make([]byte, flen)
+			copy(hh[flen-len(h):flen], h[:])
+			return hh
+		}
+	}
+
 }
 
 func StringToByteFunc(str string, cb func(str string) []byte) (ret []byte) {
@@ -211,7 +244,7 @@ func RightPadString(str string, l int) string {
 
 }
 
-func Address(slice []byte) (addr []byte) {
+func ToAddress(slice []byte) (addr []byte) {
 	if len(slice) < 20 {
 		addr = LeftPadBytes(slice, 20)
 	} else if len(slice) > 20 {

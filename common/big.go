@@ -22,13 +22,20 @@ func Big(num string) *big.Int {
 	return n
 }
 
-// BigD
+// Bytes2Big
 //
-// Shortcut for new(big.Int).SetBytes(...)
-func BigD(data []byte) *big.Int {
+func BytesToBig(data []byte) *big.Int {
 	n := new(big.Int)
 	n.SetBytes(data)
 
+	return n
+}
+func Bytes2Big(data []byte) *big.Int { return BytesToBig(data) }
+func BigD(data []byte) *big.Int      { return BytesToBig(data) }
+
+func String2Big(num string) *big.Int {
+	n := new(big.Int)
+	n.SetString(num, 0)
 	return n
 }
 
