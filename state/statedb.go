@@ -9,10 +9,10 @@ import (
 	"bytes"
 	"math/big"
 
-	"KBD/common"
-	"KBD/common/logger"
-	"KBD/common/logger/glog"
-	"KBD/trie"
+	"github.com/MonteCarloClub/KBD/common"
+	"github.com/MonteCarloClub/KBD/common/logger"
+	"github.com/MonteCarloClub/KBD/common/logger/glog"
+	"github.com/MonteCarloClub/KBD/trie"
 )
 
 // StateDBs within the ethereum protocol are used to store anything
@@ -22,9 +22,9 @@ import (
 // * Accounts
 type StateDB struct {
 	db   common.Database
-	trie *trie.SecureTrie
+	trie *trie.SecureTrie //所有账户组成的MPT树
 
-	stateObjects map[string]*StateObject
+	stateObjects map[string]*StateObject //存储缓存的账户状态信息
 
 	refund map[string]*big.Int
 

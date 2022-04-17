@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"math/big"
 
-	"KBD/common"
-	"KBD/common/logger"
-	"KBD/common/logger/glog"
-	"KBD/crypto/sha3"
-	"KBD/rlp"
-	"KBD/trie"
+	"github.com/MonteCarloClub/KBD/common"
+	"github.com/MonteCarloClub/KBD/common/logger"
+	"github.com/MonteCarloClub/KBD/common/logger/glog"
+	"github.com/MonteCarloClub/KBD/crypto/sha3"
+	"github.com/MonteCarloClub/KBD/rlp"
+	"github.com/MonteCarloClub/KBD/trie"
 )
 
 type Code []byte

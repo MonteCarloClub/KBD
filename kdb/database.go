@@ -7,9 +7,9 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
 
-	"KBD/common/logger"
-	"KBD/common/logger/glog"
-	"KBD/compression/rle"
+	"github.com/MonteCarloClub/KBD/common/logger"
+	"github.com/MonteCarloClub/KBD/common/logger/glog"
+	"github.com/MonteCarloClub/KBD/compression/rle"
 )
 
 type LDBDatabase struct {

@@ -1,4 +1,4 @@
-module KBD
+module github.com/MonteCarloClub/KBD
 
 go 1.17
 
