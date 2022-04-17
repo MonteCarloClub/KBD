@@ -1,6 +1,6 @@
 package trie
 
-import "KBD/crypto/sha3"
+import "github.com/MonteCarloClub/KBD/crypto/sha3"
 
 var keyPrefix = []byte("secure-key-")
 

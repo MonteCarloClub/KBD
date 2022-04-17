@@ -1,6 +1,6 @@
 package trie
 
-import "KBD/common"
+import "github.com/MonteCarloClub/KBD/common"
 
 type ValueNode struct {
 	trie *Trie

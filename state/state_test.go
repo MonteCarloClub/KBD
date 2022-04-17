@@ -5,8 +5,8 @@ import (
 	"math/big"
 	"testing"
 
-	"KBD/common"
-	"KBD/kdb"
+	"github.com/MonteCarloClub/KBD/common"
+	"github.com/MonteCarloClub/KBD/kdb"
 )
 
 type StateSuite struct {

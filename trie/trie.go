@@ -11,8 +11,8 @@ import (
 	"fmt"
 	"sync"
 
-	"KBD/common"
-	"KBD/crypto/sha3"
+	"github.com/MonteCarloClub/KBD/common"
+	"github.com/MonteCarloClub/KBD/crypto/sha3"
 )
 
 func ParanoiaCheck(t1 *Trie, backend Backend) (bool, *Trie) {

@@ -8,7 +8,7 @@ package state
 import (
 	"sync"
 
-	"KBD/common"
+	"github.com/MonteCarloClub/KBD/common"
 )
 
 type account struct {

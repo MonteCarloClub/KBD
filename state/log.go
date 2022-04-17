@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"io"
 
-	"KBD/common"
-	"KBD/rlp"
+	"github.com/MonteCarloClub/KBD/common"
+	"github.com/MonteCarloClub/KBD/rlp"
 )
 
 type Log struct {

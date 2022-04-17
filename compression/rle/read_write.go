@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"errors"
 
-	"KBD/crypto/sha3"
+	"github.com/MonteCarloClub/KBD/crypto/sha3"
 )
 
 const (

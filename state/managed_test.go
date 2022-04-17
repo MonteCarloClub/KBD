@@ -3,8 +3,8 @@ package state
 import (
 	"testing"
 
-	"KBD/common"
-	"KBD/kdb"
+	"github.com/MonteCarloClub/KBD/common"
+	"github.com/MonteCarloClub/KBD/kdb"
 )
 
 var addr = common.BytesToAddress([]byte("test"))
