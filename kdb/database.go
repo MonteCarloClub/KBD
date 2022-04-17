@@ -23,7 +23,7 @@ type LDBDatabase struct {
 	quit chan struct{}
 }
 
-func OpenDatabase(file string) (*LDBDatabase, error) {
+func NewLDBDatabase(file string) (*LDBDatabase, error) {
 	// Open the db
 	db, err := leveldb.OpenFile(file, nil)
 	if err != nil {
@@ -50,6 +50,14 @@ func (self *LDBDatabase) Put(key []byte, value []byte) {
 	defer self.mu.Unlock()
 
 	self.queue[string(key)] = value
+	/*
+		value = rle.Compress(value)
+
+		err := self.db.Put(key, value, nil)
+		if err != nil {
+			fmt.Println("Error put", err)
+		}
+	*/
 }
 
 func (self *LDBDatabase) Get(key []byte) ([]byte, error) {
