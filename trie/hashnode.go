@@ -1,6 +1,6 @@
 package trie
 
-import "KBD/common"
+import "github.com/MonteCarloClub/KBD/common"
 
 type HashNode struct {
 	key  []byte

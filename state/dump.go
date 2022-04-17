@@ -9,14 +9,14 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"KBD/common"
+	"github.com/MonteCarloClub/KBD/common"
 )
 
 type Account struct {
-	Balance  string            `json:"balance"`
-	Nonce    uint64            `json:"nonce"`
-	Root     string            `json:"root"`
-	CodeHash string            `json:"codeHash"`
+	Balance  string            `json:"balance"`  //账户余额
+	Nonce    uint64            `json:"nonce"`    //账户交易数量
+	Root     string            `json:"root"`     //账户存储树的root根
+	CodeHash string            `json:"codeHash"` //EVM的代码哈希值
 	Storage  map[string]string `json:"storage"`
 }
 

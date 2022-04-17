@@ -3,7 +3,7 @@ package kdb
 import (
 	"fmt"
 
-	"KBD/common"
+	"github.com/MonteCarloClub/KBD/common"
 )
 
 /*

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"KBD/common/globalconf"
+	"github.com/MonteCarloClub/KBD/common/globalconf"
 )
 
 // Config struct

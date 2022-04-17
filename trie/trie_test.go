@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"KBD/common"
-	"KBD/crypto/sha3"
+	"github.com/MonteCarloClub/KBD/common"
+	"github.com/MonteCarloClub/KBD/crypto/sha3"
 )
 
 type Db map[string][]byte
