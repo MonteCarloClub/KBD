@@ -1,146 +1,136 @@
+/*
+Copyright (c) 2022 Zhu Zunxiong <liuzunxiong@qq.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+
 package kdb
 
-import (
-	"sync"
-	"time"
+import "io"
 
-	"github.com/syndtr/goleveldb/leveldb"
-	"github.com/syndtr/goleveldb/leveldb/iterator"
+// KeyValueReader wraps the Has and Get method of a backing data store.
+type KeyValueReader interface {
+	// Has retrieves if a key is present in the key-value data store.
+	Has(key []byte) (bool, error)
 
-	"github.com/MonteCarloClub/KBD/common/logger"
-	"github.com/MonteCarloClub/KBD/common/logger/glog"
-	"github.com/MonteCarloClub/KBD/compression/rle"
-)
-
-type LDBDatabase struct {
-	fn string
-
-	mu sync.Mutex
-	db *leveldb.DB
-
-	queue map[string][]byte
-
-	quit chan struct{}
+	// Get retrieves the given key if it's present in the key-value data store.
+	Get(key []byte) ([]byte, error)
 }
 
-func NewLDBDatabase(file string) (*LDBDatabase, error) {
-	// Open the db
-	db, err := leveldb.OpenFile(file, nil)
-	if err != nil {
-		return nil, err
-	}
-	database := &LDBDatabase{
-		fn:   file,
-		db:   db,
-		quit: make(chan struct{}),
-	}
-	database.makeQueue()
+// KeyValueWriter wraps the Put method of a backing data store.
+type KeyValueWriter interface {
+	// Put inserts the given value into the key-value data store.
+	Put(key []byte, value []byte) error
 
-	go database.update()
-
-	return database, nil
+	// Delete removes the key from the key-value data store.
+	Delete(key []byte) error
 }
 
-func (self *LDBDatabase) makeQueue() {
-	self.queue = make(map[string][]byte)
+// Stater wraps the Stat method of a backing data store.
+type Stater interface {
+	// Stat returns a particular internal stat of the database.
+	Stat(property string) (string, error)
 }
 
-func (self *LDBDatabase) Put(key []byte, value []byte) {
-	self.mu.Lock()
-	defer self.mu.Unlock()
-
-	self.queue[string(key)] = value
-	/*
-		value = rle.Compress(value)
-
-		err := self.db.Put(key, value, nil)
-		if err != nil {
-			fmt.Println("Error put", err)
-		}
-	*/
+// Compacter wraps the Compact method of a backing data store.
+type Compacter interface {
+	// Compact flattens the underlying data store for the given key range. In essence,
+	// deleted and overwritten versions are discarded, and the data is rearranged to
+	// reduce the cost of operations needed to access them.
+	//
+	// A nil start is treated as a key before all keys in the data store; a nil limit
+	// is treated as a key after all keys in the data store. If both is nil then it
+	// will compact entire data store.
+	Compact(start []byte, limit []byte) error
 }
 
-func (self *LDBDatabase) Get(key []byte) ([]byte, error) {
-	self.mu.Lock()
-	defer self.mu.Unlock()
-
-	// Check queue first
-	if dat, ok := self.queue[string(key)]; ok {
-		return dat, nil
-	}
-
-	dat, err := self.db.Get(key, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return rle.Decompress(dat)
+// KeyValueStore contains all the methods required to allow handling different
+// key-value data stores backing the high level database.
+type KeyValueStore interface {
+	KeyValueReader
+	KeyValueWriter
+	Batcher
+	Iteratee
+	Stater
+	Compacter
+	io.Closer
 }
 
-func (self *LDBDatabase) Delete(key []byte) error {
-	self.mu.Lock()
-	defer self.mu.Unlock()
+// AncientReader contains the methods required to read from immutable ancient data.
+type AncientReader interface {
+	// HasAncient returns an indicator whether the specified data exists in the
+	// ancient store.
+	HasAncient(kind string, number uint64) (bool, error)
 
-	// make sure it's not in the queue
-	delete(self.queue, string(key))
+	// Ancient retrieves an ancient binary blob from the append-only immutable files.
+	Ancient(kind string, number uint64) ([]byte, error)
 
-	return self.db.Delete(key, nil)
+	// Ancients returns the ancient item numbers in the ancient store.
+	Ancients() (uint64, error)
+
+	// AncientSize returns the ancient size of the specified category.
+	AncientSize(kind string) (uint64, error)
 }
 
-func (self *LDBDatabase) LastKnownTD() []byte {
-	data, _ := self.Get([]byte("LTD"))
+// AncientWriter contains the methods required to write to immutable ancient data.
+type AncientWriter interface {
+	// AppendAncient injects all binary blobs belong to block at the end of the
+	// append-only immutable table files.
+	AppendAncient(number uint64, hash, header, body, receipt, td []byte) error
 
-	if len(data) == 0 {
-		data = []byte{0x0}
-	}
+	// TruncateAncients discards all but the first n ancient data from the ancient store.
+	TruncateAncients(n uint64) error
 
-	return data
+	// Sync flushes all in-memory ancient store data to disk.
+	Sync() error
 }
 
-func (self *LDBDatabase) NewIterator() iterator.Iterator {
-	return self.db.NewIterator(nil, nil)
+// Reader contains the methods required to read data from both key-value as well as
+// immutable ancient data.
+type Reader interface {
+	KeyValueReader
+	AncientReader
 }
 
-func (self *LDBDatabase) Flush() error {
-	self.mu.Lock()
-	defer self.mu.Unlock()
-
-	batch := new(leveldb.Batch)
-
-	for key, value := range self.queue {
-		batch.Put([]byte(key), rle.Compress(value))
-	}
-	self.makeQueue() // reset the queue
-
-	return self.db.Write(batch, nil)
+// Writer contains the methods required to write data to both key-value as well as
+// immutable ancient data.
+type Writer interface {
+	KeyValueWriter
+	AncientWriter
 }
 
-func (self *LDBDatabase) Close() {
-	self.quit <- struct{}{}
-	<-self.quit
-	glog.V(logger.Info).Infoln("flushed and closed db:", self.fn)
+// AncientStore contains all the methods required to allow handling different
+// ancient data stores backing immutable chain data store.
+type AncientStore interface {
+	AncientReader
+	AncientWriter
+	io.Closer
 }
 
-func (self *LDBDatabase) update() {
-	ticker := time.NewTicker(1 * time.Minute)
-done:
-	for {
-		select {
-		case <-ticker.C:
-			if err := self.Flush(); err != nil {
-				glog.V(logger.Error).Infof("error: flush '%s': %v\n", self.fn, err)
-			}
-		case <-self.quit:
-			break done
-		}
-	}
-
-	if err := self.Flush(); err != nil {
-		glog.V(logger.Error).Infof("error: flush '%s': %v\n", self.fn, err)
-	}
-
-	// Close the leveldb database
-	self.db.Close()
-
-	self.quit <- struct{}{}
+// Database contains all the methods required by the high level database to not
+// only access the key-value data store but also the chain freezer.
+type Database interface {
+	Reader
+	Writer
+	Batcher
+	Iteratee
+	Stater
+	Compacter
+	io.Closer
 }
