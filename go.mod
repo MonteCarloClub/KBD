@@ -3,6 +3,7 @@ module github.com/MonteCarloClub/KBD
 go 1.17
 
 require (
+	github.com/mr-tron/base58 v1.2.0
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
 	gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405

@@ -219,7 +219,7 @@ func (c *StateObject) St() Storage {
 // Gas setters and getters
 //
 
-// Return the gas back to the origin. Used by the Virtual machine or Closures
+// ReturnGas Return the gas back to the origin. Used by the Virtual machine or Closures
 func (c *StateObject) ReturnGas(gas, price *big.Int) {}
 func (c *StateObject) ConvertGas(gas, price *big.Int) error {
 	total := new(big.Int).Mul(gas, price)
@@ -295,12 +295,12 @@ func (c *StateObject) N() *big.Int {
 	return big.NewInt(int64(c.nonce))
 }
 
-// Returns the address of the contract/account
+// Address Returns the address of the contract/account
 func (c *StateObject) Address() common.Address {
 	return c.address
 }
 
-// Returns the initialization Code
+// Init Returns the initialization Code
 func (c *StateObject) Init() Code {
 	return c.initCode
 }

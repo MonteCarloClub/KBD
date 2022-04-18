@@ -177,7 +177,7 @@ func (self *StateDB) Delete(addr common.Address) bool {
 // Setting, updating & deleting state object methods
 //
 
-// Update the given state object and apply it to state trie
+// UpdateStateObject Update the given state object and apply it to state trie
 func (self *StateDB) UpdateStateObject(stateObject *StateObject) {
 	//addr := stateObject.Address()
 
@@ -189,7 +189,7 @@ func (self *StateDB) UpdateStateObject(stateObject *StateObject) {
 	self.trie.Update(addr[:], stateObject.RlpEncode())
 }
 
-// Delete the given state object and delete it from the state trie
+// DeleteStateObject Delete the given state object and delete it from the state trie
 func (self *StateDB) DeleteStateObject(stateObject *StateObject) {
 	addr := stateObject.Address()
 	self.trie.Delete(addr[:])
@@ -197,7 +197,7 @@ func (self *StateDB) DeleteStateObject(stateObject *StateObject) {
 	delete(self.stateObjects, addr.Str())
 }
 
-// Retrieve a state object given my the address. Nil if not found
+// GetStateObject Retrieve a state object given my the address. Nil if not found
 func (self *StateDB) GetStateObject(addr common.Address) *StateObject {
 	//addr = common.Address(addr)
 
