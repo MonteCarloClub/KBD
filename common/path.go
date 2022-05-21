@@ -4,6 +4,8 @@ import (
 	"io/ioutil"
 	"os"
 	"os/user"
+	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -57,4 +59,15 @@ func WriteFile(filePath string, content []byte) error {
 	}
 
 	return nil
+}
+
+func DefaultDataDir() string {
+	usr, _ := user.Current()
+	if runtime.GOOS == "darwin" {
+		return filepath.Join(usr.HomeDir, "Library", "Ethereum")
+	} else if runtime.GOOS == "windows" {
+		return filepath.Join(usr.HomeDir, "AppData", "Roaming", "Ethereum")
+	} else {
+		return filepath.Join(usr.HomeDir, ".ethereum")
+	}
 }

@@ -211,7 +211,7 @@ func symEncrypt(rand io.Reader, params *ECIESParams, key, m []byte) (ct []byte, 
 
 // symDecrypt carries out CTR decryption using the block cipher specified in
 // the parameters
-func symDecrypt(params *ECIESParams, key, ct []byte) (m []byte, err error) {
+func symDecrypt(rand io.Reader, params *ECIESParams, key, ct []byte) (m []byte, err error) {
 	c, err := params.Cipher(key)
 	if err != nil {
 		return
@@ -264,15 +264,18 @@ func Encrypt(rand io.Reader, pub *PublicKey, m, s1, s2 []byte) (ct []byte, err e
 }
 
 // Decrypt decrypts an ECIES ciphertext.
-func (prv *PrivateKey) Decrypt(c, s1, s2 []byte) (m []byte, err error) {
-	if len(c) == 0 {
-		return nil, ErrInvalidMessage
+func (prv *PrivateKey) Decrypt(rand io.Reader, c, s1, s2 []byte) (m []byte, err error) {
+	if c == nil || len(c) == 0 {
+		err = ErrInvalidMessage
+		return
 	}
-	params, err := pubkeyParams(&prv.PublicKey)
-	if err != nil {
-		return nil, err
+	params := prv.PublicKey.Params
+	if params == nil {
+		if params = ParamsFromCurve(prv.PublicKey.Curve); params == nil {
+			err = ErrUnsupportedECIESParameters
+			return
+		}
 	}
-
 	hash := params.Hash()
 
 	var (
@@ -284,12 +287,14 @@ func (prv *PrivateKey) Decrypt(c, s1, s2 []byte) (m []byte, err error) {
 
 	switch c[0] {
 	case 2, 3, 4:
-		rLen = (prv.PublicKey.Curve.Params().BitSize + 7) / 4
+		rLen = ((prv.PublicKey.Curve.Params().BitSize + 7) / 4)
 		if len(c) < (rLen + hLen + 1) {
-			return nil, ErrInvalidMessage
+			err = ErrInvalidMessage
+			return
 		}
 	default:
-		return nil, ErrInvalidPublicKey
+		err = ErrInvalidPublicKey
+		return
 	}
 
 	mStart = rLen
@@ -299,19 +304,36 @@ func (prv *PrivateKey) Decrypt(c, s1, s2 []byte) (m []byte, err error) {
 	R.Curve = prv.PublicKey.Curve
 	R.X, R.Y = elliptic.Unmarshal(R.Curve, c[:rLen])
 	if R.X == nil {
-		return nil, ErrInvalidPublicKey
+		err = ErrInvalidPublicKey
+		return
+	}
+	if !R.Curve.IsOnCurve(R.X, R.Y) {
+		err = ErrInvalidCurve
+		return
 	}
 
 	z, err := prv.GenerateShared(R, params.KeyLen, params.KeyLen)
 	if err != nil {
-		return nil, err
+		return
 	}
-	Ke, Km := deriveKeys(hash, z, s1, params.KeyLen)
+
+	K := concatKDF(hash, z, s1, params.KeyLen+params.KeyLen)
+	if err != nil {
+		return
+	}
+
+	Ke := K[:params.KeyLen]
+	Km := K[params.KeyLen:]
+	hash.Write(Km)
+	Km = hash.Sum(nil)
+	hash.Reset()
 
 	d := messageTag(params.Hash, Km, c[mStart:mEnd], s2)
 	if subtle.ConstantTimeCompare(c[mEnd:], d) != 1 {
-		return nil, ErrInvalidMessage
+		err = ErrInvalidMessage
+		return
 	}
 
-	return symDecrypt(params, Ke, c[mStart:mEnd])
+	m, err = symDecrypt(rand, params, Ke, c[mStart:mEnd])
+	return
 }
