@@ -19,8 +19,8 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/ethereum/go-ethereum/core/state"
-	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/MonteCarloClub/KBD/crypto"
+	"github.com/MonteCarloClub/KBD/state"
 	"math/big"
 	"unsafe"
 )
