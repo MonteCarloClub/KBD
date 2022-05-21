@@ -144,3 +144,7 @@ done:
 
 	self.quit <- struct{}{}
 }
+
+func (self *LDBDatabase) LDB() *leveldb.DB {
+	return self.db
+}

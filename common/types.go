@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"math/big"
 	"math/rand"
 	"reflect"
@@ -24,6 +25,7 @@ func BytesToHash(b []byte) Hash {
 func StringToHash(s string) Hash { return BytesToHash([]byte(s)) }
 func BigToHash(b *big.Int) Hash  { return BytesToHash(b.Bytes()) }
 func HexToHash(s string) Hash    { return BytesToHash(FromHex(s)) }
+func EmptyHash(h Hash) bool      { return h == Hash{} }
 
 // Don't use the default 'String' method in case we want to overwrite
 
@@ -94,4 +96,14 @@ func (a *Address) Set(other Address) {
 	for i, v := range other {
 		a[i] = v
 	}
+}
+
+// PP Pretty Prints a byte slice in the following format:
+// 	hex(value[:4])...(hex[len(value)-4:])
+func PP(value []byte) string {
+	if len(value) <= 8 {
+		return Bytes2Hex(value)
+	}
+
+	return fmt.Sprintf("%x...%x", value[:4], value[len(value)-4])
 }
