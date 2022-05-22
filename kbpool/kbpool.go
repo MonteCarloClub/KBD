@@ -216,7 +216,7 @@ func (self *TxPool) add(tx *types.Transaction) error {
 		// verified in ValidateTransaction.
 		f, _ := tx.From()
 		from := common.Bytes2Hex(f[:4])
-		glog.Infof("(t) %x => %s (%v) %x\n", from, toname, tx.Value, hash)
+		glog.Infof("(t) %x => %s (%v) %x\n", from, toname, tx.Value(), hash)
 	}
 
 	// check and validate the queueue
