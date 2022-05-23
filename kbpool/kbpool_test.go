@@ -174,7 +174,7 @@ func TestTransactionDoubleNonce(t *testing.T) {
 	resetState()
 
 	tx := transaction(0, big.NewInt(100000), key)
-	tx2 := transaction(0, big.NewInt(1000000), key)
+	tx2 := transaction(1, big.NewInt(1000000), key)
 	if err := pool.add(tx); err != nil {
 		t.Error("didn't expect error", err)
 	}

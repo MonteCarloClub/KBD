@@ -59,4 +59,17 @@ ok      github.com/MonteCarloClub/KBD/state     0.560s [no tests to run]
 | 不并发 | 1.343s | 1.072s |
 | 并发  | 0.440s | 0.560s |
 
-## 下旬：准备开始hbpool
+## 下旬:准备开始kbpool
+
+---
+
+
+# 5月进度
+
+## 上旬:完成kbpool的基础架构
+
+## 下旬:从以太坊中迁移pow、vm、filter、even、以及区块结构部分，使代码先跑起来
+
+## 后续:
+### 1：将Kchain的相关机制替换到上述从以太坊迁移的代码
+### 2：修改Kbpool的验证流程完成实现分片相关机制
