@@ -3,8 +3,9 @@ package block_error
 import (
 	"errors"
 	"fmt"
-	"github.com/MonteCarloClub/KBD/common"
 	"math/big"
+
+	"github.com/MonteCarloClub/KBD/common"
 )
 
 var (

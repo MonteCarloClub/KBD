@@ -173,17 +173,25 @@ func TestTransactionDoubleNonce(t *testing.T) {
 	}
 	resetState()
 
-	tx := transaction(0, big.NewInt(100000), key)
-	tx2 := transaction(1, big.NewInt(1000000), key)
+	tx := transaction(0, big.NewInt(21000), key)
+	tx2 := transaction(0, big.NewInt(23333), key)
+	tx3 := transaction(1, big.NewInt(110000), key)
+	tx4 := transaction(2, big.NewInt(300000), key)
 	if err := pool.add(tx); err != nil {
 		t.Error("didn't expect error", err)
 	}
 	if err := pool.add(tx2); err != nil {
 		t.Error("didn't expect error", err)
 	}
+	if err := pool.add(tx3); err != nil {
+		t.Error("didn't expect error", err)
+	}
+	if err := pool.add(tx4); err != nil {
+		t.Error("didn't expect error", err)
+	}
 
 	pool.checkQueue()
-	if len(pool.pending) != 2 {
+	if len(pool.pending) != 3 {
 		t.Error("expected 2 pending txs. Got", len(pool.pending))
 	}
 }

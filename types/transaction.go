@@ -9,8 +9,6 @@ import (
 	"sync/atomic"
 
 	"github.com/MonteCarloClub/KBD/common"
-	"github.com/MonteCarloClub/KBD/common/logger"
-	"github.com/MonteCarloClub/KBD/common/logger/glog"
 	"github.com/MonteCarloClub/KBD/crypto"
 	"github.com/MonteCarloClub/KBD/crypto/sha3"
 	"github.com/MonteCarloClub/KBD/rlp"
@@ -184,7 +182,6 @@ func (tx *Transaction) publicKey() ([]byte, error) {
 	hash := tx.Hash()
 	pub, err := crypto.Ecrecover(hash[:], sig)
 	if err != nil {
-		glog.V(logger.Error).Infof("Could not get pubkey from signature: ", err)
 		return nil, err
 	}
 	if len(pub) == 0 || pub[0] != 4 {
