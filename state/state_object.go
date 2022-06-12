@@ -234,7 +234,7 @@ func (c *StateObject) ConvertGas(gas, price *big.Int) error {
 	return nil
 }
 
-func (self *StateObject) SetGasPool(gasLimit *big.Int) {
+func (self *StateObject) SetGasLimit(gasLimit *big.Int) {
 	self.gasPool = new(big.Int).Set(gasLimit)
 
 	if glog.V(logger.Core) {

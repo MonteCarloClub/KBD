@@ -442,9 +442,10 @@ func (self *Vm) Run(context *Context, input []byte) (ret []byte, err error) {
 			stack.push(coinbase.Big())
 
 		case TIMESTAMP:
-			time := self.env.Time()
+			time := self.env.
+				Time()
 
-			stack.push(big.NewInt(time))
+			stack.push(big.NewInt(int64(time)))
 
 		case NUMBER:
 			number := self.env.BlockNumber()

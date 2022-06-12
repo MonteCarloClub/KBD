@@ -63,7 +63,6 @@ ok      github.com/MonteCarloClub/KBD/state     0.560s [no tests to run]
 
 ---
 
-
 # 5月进度
 
 ## 上旬:完成kbpool的基础架构
@@ -73,3 +72,5 @@ ok      github.com/MonteCarloClub/KBD/state     0.560s [no tests to run]
 ## 后续:
 ### 1：将Kchain的相关机制替换到上述从以太坊迁移的代码
 ### 2：修改Kbpool的验证流程完成实现分片相关机制
+
+![](../../../../../Desktop/截屏2022-06-06 19.05.37.png)
