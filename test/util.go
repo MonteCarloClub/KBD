@@ -47,6 +47,13 @@ func checkLogs(tlog []Log, logs state.Logs) error {
 	return nil
 }
 
+type Account struct {
+	Balance string
+	Code    string
+	Nonce   string
+	Storage map[string]string
+}
+
 type Log struct {
 	AddressF string   `json:"address"`
 	DataF    string   `json:"data"`
@@ -65,14 +72,14 @@ func (self Log) Topics() [][]byte {
 	return t
 }
 
-func StateObjectFromAccount(db common.Database, addr string, account state.Account) *state.StateObject {
+func StateObjectFromAccount(db common.Database, addr string, account Account) *state.StateObject {
 	obj := state.NewStateObject(common.HexToAddress(addr), db)
 	obj.SetBalance(common.Big(account.Balance))
 
-	if common.IsHex(account.CodeHash) {
-		account.CodeHash = account.CodeHash[2:]
+	if common.IsHex(account.Code) {
+		account.Code = account.Code[2:]
 	}
-	obj.SetCode(common.Hex2Bytes(account.CodeHash))
+	obj.SetCode(common.Hex2Bytes(account.Code))
 	obj.SetNonce(common.Big(string(account.Nonce)).Uint64())
 
 	return obj
@@ -96,8 +103,8 @@ type VmTest struct {
 	Logs          []Log
 	Gas           string
 	Out           string
-	Post          map[string]state.Account
-	Pre           map[string]state.Account
+	Post          map[string]Account
+	Pre           map[string]Account
 	PostStateRoot string
 }
 

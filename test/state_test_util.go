@@ -117,7 +117,7 @@ func runStateTest(t VmTest) error {
 			return fmt.Errorf("(%x) balance failed. Expected %v, got %v => %v\n", obj.Address().Bytes()[:4], account.Balance, obj.Balance(), new(big.Int).Sub(common.Big(account.Balance), obj.Balance()))
 		}
 
-		if obj.Nonce() != common.String2Big(string(account.Nonce)).Uint64() {
+		if obj.Nonce() != common.String2Big(account.Nonce).Uint64() {
 			return fmt.Errorf("(%x) nonce failed. Expected %v, got %v\n", obj.Address().Bytes()[:4], account.Nonce, obj.Nonce())
 		}
 

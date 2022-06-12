@@ -40,7 +40,7 @@ var (
 func readJson(reader io.Reader, value interface{}) error {
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
-		return fmt.Errorf("Error reading JSON file", err.Error())
+		return fmt.Errorf("Error reading JSON file %v", err.Error())
 	}
 
 	if err = json.Unmarshal(data, &value); err != nil {
