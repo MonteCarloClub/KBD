@@ -1,7 +1,3 @@
-// Copyright 2015 Jeffrey Wilcke, Felix Lange, Gustav Simonsson. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be found in
-// the LICENSE file.
-
 //go:build !gofuzz && cgo
 // +build !gofuzz,cgo
 
@@ -61,12 +57,6 @@ var (
 	ErrRecoverFailed       = errors.New("recovery failed")
 )
 
-// Sign creates a recoverable ECDSA signature.
-// The produced signature is in the 65-byte [R || S || V] format where V is 0 or 1.
-//
-// The caller is responsible for ensuring that msg cannot be chosen
-// directly by an attacker. It is usually preferable to use a cryptographic
-// hash function on any input before handing it to this function.
 func Sign(msg []byte, seckey []byte) ([]byte, error) {
 	if len(msg) != 32 {
 		return nil, ErrInvalidMsgLen
