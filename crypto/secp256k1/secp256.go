@@ -33,6 +33,9 @@ extern void secp256k1GoPanicError(const char* msg, void* data);
 import "C"
 
 import (
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
 	"errors"
 	"math/big"
 	"unsafe"
@@ -56,6 +59,26 @@ var (
 	ErrSignFailed          = errors.New("signing failed")
 	ErrRecoverFailed       = errors.New("recovery failed")
 )
+
+func GenerateKeyPair() (pubkey, privkey []byte) {
+	key, err := ecdsa.GenerateKey(S256(), rand.Reader)
+	if err != nil {
+		panic(err)
+	}
+	pubkey = elliptic.Marshal(S256(), key.X, key.Y)
+
+	privkey = make([]byte, 32)
+	blob := key.D.Bytes()
+	copy(privkey[32-len(blob):], blob)
+
+	return pubkey, privkey
+}
+
+func GeneratePubKey(seckey []byte) ([]byte, error) {
+	priv := &ecdsa.PrivateKey{}
+	priv.PublicKey.X, priv.PublicKey.Y = S256().ScalarBaseMult(seckey)
+	return elliptic.Marshal(S256(), priv.X, priv.Y), nil
+}
 
 func Sign(msg []byte, seckey []byte) ([]byte, error) {
 	if len(msg) != 32 {
