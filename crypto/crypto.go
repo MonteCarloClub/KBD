@@ -246,7 +246,7 @@ func decryptPreSaleKey(fileContent []byte, password string) (key *Key, err error
 	ethPriv := Sha3(plainText)
 	ecKey := ToECDSA(ethPriv)
 	key = &Key{
-		Id:         [16]byte{},
+		Id:         uuid.Nil,
 		Address:    PubkeyToAddress(ecKey.PublicKey),
 		PrivateKey: ecKey,
 	}

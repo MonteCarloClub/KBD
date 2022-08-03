@@ -8,7 +8,7 @@ import (
 
 	"github.com/MonteCarloClub/KBD/common"
 	"github.com/MonteCarloClub/KBD/crypto"
-	"github.com/MonteCarloClub/KBD/exe"
+	"github.com/MonteCarloClub/KBD/execution"
 	"github.com/MonteCarloClub/KBD/state"
 	"github.com/MonteCarloClub/KBD/types"
 	"github.com/MonteCarloClub/KBD/vm"
@@ -80,7 +80,7 @@ func StateObjectFromAccount(db common.Database, addr string, account Account) *s
 		account.Code = account.Code[2:]
 	}
 	obj.SetCode(common.Hex2Bytes(account.Code))
-	obj.SetNonce(common.Big(string(account.Nonce)).Uint64())
+	obj.SetNonce(common.Big(account.Nonce).Uint64())
 
 	return obj
 }
@@ -172,7 +172,7 @@ func (self *Env) GetHash(n uint64) common.Hash {
 	return common.BytesToHash(crypto.Sha3([]byte(big.NewInt(int64(n)).String())))
 }
 func (self *Env) AddLog(log *state.Log) {
-	self.AddLog(log)
+	self.state.AddLog(log)
 }
 func (self *Env) Depth() int     { return self.depth }
 func (self *Env) SetDepth(i int) { self.depth = i }
@@ -193,8 +193,8 @@ func (self *Env) Transfer(from, to vm.Account, amount *big.Int) error {
 	return vm.Transfer(from, to, amount)
 }
 
-func (self *Env) vm(addr *common.Address, data []byte, gas, price, value *big.Int) *exe.Execution {
-	exec := exe.NewExecution(self, addr, data, gas, price, value)
+func (self *Env) vm(addr *common.Address, data []byte, gas, price, value *big.Int) *execution.Execution {
+	exec := execution.NewExecution(self, addr, data, gas, price, value)
 
 	return exec
 }

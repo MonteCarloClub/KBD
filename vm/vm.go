@@ -116,7 +116,7 @@ func (self *Vm) Run(context *Context, input []byte) (ret []byte, err error) {
 
 			context.UseGas(context.Gas)
 
-			return context.Return(nil), OutOfGasError{}
+			return context.Return(nil), OutOfGasError
 		}
 		// Resize the memory calculated previously
 		mem.Resize(newMemSize.Uint64())
@@ -442,10 +442,9 @@ func (self *Vm) Run(context *Context, input []byte) (ret []byte, err error) {
 			stack.push(coinbase.Big())
 
 		case TIMESTAMP:
-			time := self.env.
-				Time()
+			time := self.env.Time()
 
-			stack.push(big.NewInt(int64(time)))
+			stack.push(new(big.Int).SetUint64(time))
 
 		case NUMBER:
 			number := self.env.BlockNumber()
@@ -687,7 +686,12 @@ func (self *Vm) calculateGasAndSize(context *Context, caller ContextRef, op OpCo
 		var g *big.Int
 		y, x := stack.data[stack.len()-2], stack.data[stack.len()-1]
 		val := statedb.GetState(context.Address(), common.BigToHash(x))
-		if len(val) == 0 && len(y.Bytes()) > 0 {
+
+		// This checks for 3 scenario's and calculates gas accordingly
+		// 1. From a zero-value address to a non-zero value         (NEW VALUE)
+		// 2. From a non-zero value address to a zero-value address (DELETE)
+		// 3. From a nen-zero to a non-zero                         (CHANGE)
+		if common.EmptyHash(val) && !common.EmptyHash(common.BigToHash(y)) {
 			// 0 => non 0
 			g = params.SstoreSetGas
 		} else if !common.EmptyHash(val) && common.EmptyHash(common.BigToHash(y)) {
@@ -785,7 +789,7 @@ func (self *Vm) RunPrecompiled(p *PrecompiledAccount, input []byte, context *Con
 
 		return context.Return(ret), nil
 	} else {
-		return nil, OutOfGasError{}
+		return nil, OutOfGasError
 	}
 }
 

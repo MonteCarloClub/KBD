@@ -1,10 +1,10 @@
 package types
 
 import (
-	"github.com/MonteCarloClub/KBD/crypto/sha3"
 	"math/big"
 
 	"github.com/MonteCarloClub/KBD/common"
+	"github.com/MonteCarloClub/KBD/crypto"
 	"github.com/MonteCarloClub/KBD/state"
 )
 
@@ -40,7 +40,7 @@ func LogsBloom(logs state.Logs) *big.Int {
 }
 
 func bloom9(b []byte) *big.Int {
-	b = sha3.Sha3(b[:])
+	b = crypto.Sha3(b[:])
 
 	r := new(big.Int)
 

@@ -3,8 +3,7 @@ package rle
 import (
 	"bytes"
 	"errors"
-
-	"github.com/MonteCarloClub/KBD/crypto/sha3"
+	"github.com/MonteCarloClub/KBD/crypto"
 )
 
 const (
@@ -14,8 +13,8 @@ const (
 	tokenToken             = 0xff
 )
 
-var empty = sha3.Sha3([]byte(""))
-var emptyList = sha3.Sha3([]byte{0x80})
+var empty = crypto.Sha3([]byte(""))
+var emptyList = crypto.Sha3([]byte{0x80})
 
 func Decompress(dat []byte) ([]byte, error) {
 	buf := new(bytes.Buffer)

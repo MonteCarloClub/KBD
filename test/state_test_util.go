@@ -67,10 +67,10 @@ func runStateTests(tests map[string]VmTest, skipTests []string) error {
 
 }
 
-func runStateTest(t VmTest) error {
+func runStateTest(test VmTest) error {
 	db, _ := kdb.NewMemDatabase()
 	statedb := state.New(common.Hash{}, db)
-	for addr, account := range t.Pre {
+	for addr, account := range test.Pre {
 		obj := StateObjectFromAccount(db, addr, account)
 		statedb.SetStateObject(obj)
 		for a, v := range account.Storage {
@@ -80,15 +80,15 @@ func runStateTest(t VmTest) error {
 
 	// XXX Yeah, yeah...
 	env := make(map[string]string)
-	env["currentCoinbase"] = t.Env.CurrentCoinbase
-	env["currentDifficulty"] = t.Env.CurrentDifficulty
-	env["currentGasLimit"] = t.Env.CurrentGasLimit
-	env["currentNumber"] = t.Env.CurrentNumber
-	env["previousHash"] = t.Env.PreviousHash
-	if n, ok := t.Env.CurrentTimestamp.(float64); ok {
+	env["currentCoinbase"] = test.Env.CurrentCoinbase
+	env["currentDifficulty"] = test.Env.CurrentDifficulty
+	env["currentGasLimit"] = test.Env.CurrentGasLimit
+	env["currentNumber"] = test.Env.CurrentNumber
+	env["previousHash"] = test.Env.PreviousHash
+	if n, ok := test.Env.CurrentTimestamp.(float64); ok {
 		env["currentTimestamp"] = strconv.Itoa(int(n))
 	} else {
-		env["currentTimestamp"] = t.Env.CurrentTimestamp.(string)
+		env["currentTimestamp"] = test.Env.CurrentTimestamp.(string)
 	}
 
 	var (
@@ -98,21 +98,21 @@ func runStateTest(t VmTest) error {
 		logs state.Logs
 	)
 
-	ret, logs, _, _ = RunState(statedb, env, t.Transaction)
+	ret, logs, _, _ = RunState(statedb, env, test.Transaction)
 
 	// // Compare expected  and actual return
-	rexp := common.FromHex(t.Out)
+	rexp := common.FromHex(test.Out)
 	if bytes.Compare(rexp, ret) != 0 {
 		return fmt.Errorf("return failed. Expected %x, got %x\n", rexp, ret)
 	}
 
 	// check post state
-	for addr, account := range t.Post {
+	for addr, account := range test.Post {
 		obj := statedb.GetStateObject(common.HexToAddress(addr))
 		if obj == nil {
 			continue
 		}
-
+		fmt.Println(obj.Balance(), " \t", common.Big(account.Balance))
 		if obj.Balance().Cmp(common.Big(account.Balance)) != 0 {
 			return fmt.Errorf("(%x) balance failed. Expected %v, got %v => %v\n", obj.Address().Bytes()[:4], account.Balance, obj.Balance(), new(big.Int).Sub(common.Big(account.Balance), obj.Balance()))
 		}
@@ -132,13 +132,13 @@ func runStateTest(t VmTest) error {
 	}
 
 	statedb.Sync()
-	if common.HexToHash(t.PostStateRoot) != statedb.Root() {
-		return fmt.Errorf("Post state root error. Expected %s, got %x", t.PostStateRoot, statedb.Root())
+	if common.HexToHash(test.PostStateRoot) != statedb.Root() {
+		return fmt.Errorf("Post state root error. Expected %s, got %x", test.PostStateRoot, statedb.Root())
 	}
 
 	// check logs
-	if len(t.Logs) > 0 {
-		if err := checkLogs(t.Logs, logs); err != nil {
+	if len(test.Logs) > 0 {
+		if err := checkLogs(test.Logs, logs); err != nil {
 			return err
 		}
 	}
@@ -147,15 +147,14 @@ func runStateTest(t VmTest) error {
 }
 
 func RunState(statedb *state.StateDB, env, tx map[string]string) ([]byte, state.Logs, *big.Int, error) {
-	reader := bytes.NewReader([]byte(tx["secretKey"]))
 	var (
-		keyPair = crypto.NewKey(reader)
-		data    = common.FromHex(tx["data"])
-		gas     = common.Big(tx["gasLimit"])
-		price   = common.Big(tx["gasPrice"])
-		value   = common.Big(tx["value"])
-		nonce   = common.Big(tx["nonce"]).Uint64()
-		caddr   = common.HexToAddress(env["currentCoinbase"])
+		key   = crypto.ToECDSA(common.Hex2Bytes(tx["secretKey"]))
+		data  = common.FromHex(tx["data"])
+		gas   = common.Big(tx["gasLimit"])
+		price = common.Big(tx["gasPrice"])
+		value = common.Big(tx["value"])
+		nonce = common.Big(tx["nonce"]).Uint64()
+		caddr = common.HexToAddress(env["currentCoinbase"])
 	)
 
 	var to *common.Address
@@ -170,14 +169,14 @@ func RunState(statedb *state.StateDB, env, tx map[string]string) ([]byte, state.
 	coinbase := statedb.GetOrNewStateObject(caddr)
 	coinbase.SetGasLimit(common.Big(env["currentGasLimit"]))
 
-	message := NewMessage(keyPair.Address, to, data, value, gas, price, nonce)
+	message := NewMessage(crypto.PubkeyToAddress(key.PublicKey), to, data, value, gas, price, nonce)
 	vmenv := NewEnvFromMap(statedb, env, tx)
-	vmenv.origin = keyPair.Address
+	vmenv.origin = crypto.PubkeyToAddress(key.PublicKey)
 	ret, _, err := kbpool.ApplyMessage(vmenv, message, coinbase)
 	if block_error.IsNonceErr(err) || block_error.IsInvalidTxErr(err) || state.IsGasLimitErr(err) {
 		statedb.Set(snapshot)
 	}
-	statedb.Sync()
+	statedb.SyncObjects()
 
 	return ret, vmenv.state.Logs(), vmenv.Gas, err
 }

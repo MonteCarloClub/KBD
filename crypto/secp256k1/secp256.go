@@ -1,3 +1,7 @@
+// Copyright 2015 Jeffrey Wilcke, Felix Lange, Gustav Simonsson. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be found in
+// the LICENSE file.
+
 //go:build !gofuzz && cgo
 // +build !gofuzz,cgo
 
@@ -33,6 +37,9 @@ extern void secp256k1GoPanicError(const char* msg, void* data);
 import "C"
 
 import (
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
 	"errors"
 	"math/big"
 	"unsafe"
@@ -57,6 +64,12 @@ var (
 	ErrRecoverFailed       = errors.New("recovery failed")
 )
 
+// Sign creates a recoverable ECDSA signature.
+// The produced signature is in the 65-byte [R || S || V] format where V is 0 or 1.
+//
+// The caller is responsible for ensuring that msg cannot be chosen
+// directly by an attacker. It is usually preferable to use a cryptographic
+// hash function on any input before handing it to this function.
 func Sign(msg []byte, seckey []byte) ([]byte, error) {
 	if len(msg) != 32 {
 		return nil, ErrInvalidMsgLen
@@ -166,4 +179,18 @@ func checkSignature(sig []byte) error {
 		return ErrInvalidRecoveryID
 	}
 	return nil
+}
+
+func GenerateKeyPair() (pubkey, privkey []byte) {
+	key, err := ecdsa.GenerateKey(S256(), rand.Reader)
+	if err != nil {
+		panic(err)
+	}
+	pubkey = elliptic.Marshal(S256(), key.X, key.Y)
+
+	privkey = make([]byte, 32)
+	blob := key.D.Bytes()
+	copy(privkey[32-len(blob):], blob)
+
+	return pubkey, privkey
 }

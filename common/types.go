@@ -25,7 +25,6 @@ func BytesToHash(b []byte) Hash {
 func StringToHash(s string) Hash { return BytesToHash([]byte(s)) }
 func BigToHash(b *big.Int) Hash  { return BytesToHash(b.Bytes()) }
 func HexToHash(s string) Hash    { return BytesToHash(FromHex(s)) }
-func EmptyHash(h Hash) bool      { return h == Hash{} }
 
 // Don't use the default 'String' method in case we want to overwrite
 
@@ -61,6 +60,10 @@ func (h Hash) Generate(rand *rand.Rand, size int) reflect.Value {
 		h[i] = byte(rand.Uint32())
 	}
 	return reflect.ValueOf(h)
+}
+
+func EmptyHash(h Hash) bool {
+	return h == Hash{}
 }
 
 /////////// Address

@@ -12,7 +12,7 @@ import (
 type Backend interface {
 	AccountManager() *accounts.Manager
 	BlockProcessor() *types.BlockProcessor
-	ChainManager() *chain_manager.Manager
+	ChainManager() *chain_manager.ChainManager
 	TxPool() *kbpool.TxPool
 	BlockDb() common.Database
 	StateDb() common.Database
