@@ -8,7 +8,6 @@ import (
 	"github.com/MonteCarloClub/KBD/common"
 	"github.com/MonteCarloClub/KBD/common/logger"
 	"github.com/MonteCarloClub/KBD/common/logger/glog"
-	"github.com/MonteCarloClub/KBD/crypto"
 	"github.com/MonteCarloClub/KBD/params"
 	"github.com/MonteCarloClub/KBD/state"
 	"github.com/MonteCarloClub/KBD/vm"
@@ -61,17 +60,8 @@ type Message interface {
 	Data() []byte
 }
 
-func AddressFromMessage(msg Message) common.Address {
-	from, _ := msg.From()
-	return crypto.CreateAddress(from, msg.Nonce())
-}
-
 func MessageCreatesContract(msg Message) bool {
 	return msg.To() == nil
-}
-
-func MessageGasValue(msg Message) *big.Int {
-	return new(big.Int).Mul(msg.Gas(), msg.GasPrice())
 }
 
 // IntrinsicGas computes the 'intrisic gas' for a message
@@ -105,7 +95,7 @@ func NewStateTransition(env vm.Environment, msg Message, coinbase *state.StateOb
 		env:        env,
 		msg:        msg,
 		gas:        new(big.Int),
-		gasPrice:   new(big.Int).Set(msg.GasPrice()),
+		gasPrice:   msg.GasPrice(),
 		initialGas: new(big.Int),
 		value:      msg.Value(),
 		data:       msg.Data(),
@@ -137,7 +127,7 @@ func (self *StateTransition) To() *state.StateObject {
 
 func (self *StateTransition) UseGas(amount *big.Int) error {
 	if self.gas.Cmp(amount) < 0 {
-		return block_error.OutOfGasError()
+		return vm.OutOfGasError
 	}
 	self.gas.Sub(self.gas, amount)
 
@@ -255,15 +245,4 @@ func (self *StateTransition) refundGas() {
 
 func (self *StateTransition) gasUsed() *big.Int {
 	return new(big.Int).Sub(self.initialGas, self.gas)
-}
-
-// Converts an message in to a state object
-func makeContract(msg Message, state *state.StateDB) *state.StateObject {
-	faddr, _ := msg.From()
-	addr := crypto.CreateAddress(faddr, msg.Nonce())
-
-	contract := state.GetOrNewStateObject(addr)
-	contract.SetInitCode(msg.Data())
-
-	return contract
 }
