@@ -3,16 +3,16 @@ package trie
 import (
 	"bytes"
 	"fmt"
+	"github.com/MonteCarloClub/KBD/crypto"
 	"testing"
 
 	"github.com/MonteCarloClub/KBD/common"
-	"github.com/MonteCarloClub/KBD/crypto/sha3"
 )
 
 type Db map[string][]byte
 
 func (self Db) Get(k []byte) ([]byte, error) { return self[string(k)], nil }
-func (self Db) Put(k, v []byte)              { self[string(k)] = v }
+func (self Db) Put(k, v []byte) error        { self[string(k)] = v; return nil }
 
 // Used for testing
 func NewEmpty() *Trie {
@@ -26,7 +26,7 @@ func NewEmptySecure() *SecureTrie {
 func TestEmptyTrie(t *testing.T) {
 	trie := NewEmpty()
 	res := trie.Hash()
-	exp := sha3.Sha3(common.Encode(""))
+	exp := crypto.Sha3(common.Encode(""))
 	if !bytes.Equal(res, exp) {
 		t.Errorf("expected %x got %x", exp, res)
 	}
@@ -152,7 +152,7 @@ func TestReplication(t *testing.T) {
 	}
 	trie.Commit()
 
-	trie2 := New(trie.roothash, trie.cache.backend)
+	trie2 := New(trie.Root(), trie.cache.backend)
 	if string(trie2.GetString("horse")) != "stallion" {
 		t.Error("expected to have horse => stallion")
 	}

@@ -22,11 +22,12 @@ import (
 // * Accounts
 type StateDB struct {
 	db   common.Database
-	trie *trie.SecureTrie //所有账户组成的MPT树
+	trie *trie.SecureTrie
+	root common.Hash
 
-	stateObjects map[string]*StateObject //存储缓存的账户状态信息
+	stateObjects map[string]*StateObject
 
-	refund map[string]*big.Int
+	refund *big.Int
 
 	thash, bhash common.Hash
 	txIndex      int
@@ -36,11 +37,11 @@ type StateDB struct {
 // Create a new state from a given trie
 func New(root common.Hash, db common.Database) *StateDB {
 	trie := trie.NewSecure(root[:], db)
-	return &StateDB{db: db, trie: trie, stateObjects: make(map[string]*StateObject), refund: make(map[string]*big.Int), logs: make(map[common.Hash]Logs)}
+	return &StateDB{root: root, db: db, trie: trie, stateObjects: make(map[string]*StateObject), refund: new(big.Int), logs: make(map[common.Hash]Logs)}
 }
 
 func (self *StateDB) PrintRoot() {
-	self.trie.PrintRoot()
+	self.trie.Trie.PrintRoot()
 }
 
 func (self *StateDB) StartRecord(thash, bhash common.Hash, ti int) {
@@ -68,12 +69,8 @@ func (self *StateDB) Logs() Logs {
 	return logs
 }
 
-func (self *StateDB) Refund(address common.Address, gas *big.Int) {
-	addr := address.Str()
-	if self.refund[addr] == nil {
-		self.refund[addr] = new(big.Int)
-	}
-	self.refund[addr].Add(self.refund[addr], gas)
+func (self *StateDB) Refund(gas *big.Int) {
+	self.refund.Add(self.refund, gas)
 }
 
 /*
@@ -112,13 +109,13 @@ func (self *StateDB) GetCode(addr common.Address) []byte {
 	return nil
 }
 
-func (self *StateDB) GetState(a common.Address, b common.Hash) []byte {
+func (self *StateDB) GetState(a common.Address, b common.Hash) common.Hash {
 	stateObject := self.GetStateObject(a)
 	if stateObject != nil {
-		return stateObject.GetState(b).Bytes()
+		return stateObject.GetState(b)
 	}
 
-	return nil
+	return common.Hash{}
 }
 
 func (self *StateDB) IsDeleted(addr common.Address) bool {
@@ -154,10 +151,10 @@ func (self *StateDB) SetCode(addr common.Address, code []byte) {
 	}
 }
 
-func (self *StateDB) SetState(addr common.Address, key common.Hash, value interface{}) {
+func (self *StateDB) SetState(addr common.Address, key common.Hash, value common.Hash) {
 	stateObject := self.GetOrNewStateObject(addr)
 	if stateObject != nil {
-		stateObject.SetState(key, common.NewValue(value))
+		stateObject.SetState(key, value)
 	}
 }
 
@@ -177,7 +174,7 @@ func (self *StateDB) Delete(addr common.Address) bool {
 // Setting, updating & deleting state object methods
 //
 
-// UpdateStateObject Update the given state object and apply it to state trie
+// Update the given state object and apply it to state trie
 func (self *StateDB) UpdateStateObject(stateObject *StateObject) {
 	//addr := stateObject.Address()
 
@@ -189,15 +186,15 @@ func (self *StateDB) UpdateStateObject(stateObject *StateObject) {
 	self.trie.Update(addr[:], stateObject.RlpEncode())
 }
 
-// DeleteStateObject Delete the given state object and delete it from the state trie
+// Delete the given state object and delete it from the state trie
 func (self *StateDB) DeleteStateObject(stateObject *StateObject) {
 	addr := stateObject.Address()
 	self.trie.Delete(addr[:])
 
-	delete(self.stateObjects, addr.Str())
+	//delete(self.stateObjects, addr.Str())
 }
 
-// GetStateObject Retrieve a state object given my the address. Nil if not found
+// Retrieve a state object given my the address. Nil if not found
 func (self *StateDB) GetStateObject(addr common.Address) *StateObject {
 	//addr = common.Address(addr)
 
@@ -268,14 +265,12 @@ func (s *StateDB) Cmp(other *StateDB) bool {
 
 func (self *StateDB) Copy() *StateDB {
 	state := New(common.Hash{}, self.db)
-	state.trie = self.trie.Copy()
+	state.trie = self.trie
 	for k, stateObject := range self.stateObjects {
 		state.stateObjects[k] = stateObject.Copy()
 	}
 
-	for addr, refund := range self.refund {
-		state.refund[addr] = new(big.Int).Set(refund)
-	}
+	state.refund.Set(self.refund)
 
 	for hash, logs := range self.logs {
 		state.logs[hash] = make(Logs, len(logs))
@@ -303,14 +298,10 @@ func (s *StateDB) Trie() *trie.SecureTrie {
 
 // Resets the trie and all siblings
 func (s *StateDB) Reset() {
-	// todo s.trie.Reset()
+	s.trie.Reset()
 
 	// Reset all nested states
 	for _, stateObject := range s.stateObjects {
-		if stateObject.State == nil {
-			continue
-		}
-
 		stateObject.Reset()
 	}
 
@@ -321,41 +312,56 @@ func (s *StateDB) Reset() {
 func (s *StateDB) Sync() {
 	// Sync all nested states
 	for _, stateObject := range s.stateObjects {
-		if stateObject.State == nil {
-			continue
-		}
-
-		stateObject.State.Sync()
+		stateObject.trie.Commit()
 	}
 
-	//todo s.trie.Commit()
+	s.trie.Commit()
 
 	s.Empty()
 }
 
 func (self *StateDB) Empty() {
 	self.stateObjects = make(map[string]*StateObject)
-	self.refund = make(map[string]*big.Int)
+	self.refund = new(big.Int)
 }
 
-func (self *StateDB) Refunds() map[string]*big.Int {
+func (self *StateDB) Refunds() *big.Int {
 	return self.refund
 }
 
-func (self *StateDB) Update() {
-	self.refund = make(map[string]*big.Int)
+// SyncIntermediate updates the intermediate state and all mid steps
+func (self *StateDB) SyncIntermediate() {
+	self.refund = new(big.Int)
 
 	for _, stateObject := range self.stateObjects {
 		if stateObject.dirty {
 			if stateObject.remove {
 				self.DeleteStateObject(stateObject)
 			} else {
-				stateObject.Sync()
+				stateObject.Update()
 
 				self.UpdateStateObject(stateObject)
 			}
 			stateObject.dirty = false
 		}
+	}
+}
+
+// SyncObjects syncs the changed objects to the trie
+func (self *StateDB) SyncObjects() {
+	self.trie = trie.NewSecure(self.root[:], self.db)
+
+	self.refund = new(big.Int)
+
+	for _, stateObject := range self.stateObjects {
+		if stateObject.remove {
+			self.DeleteStateObject(stateObject)
+		} else {
+			stateObject.Update()
+
+			self.UpdateStateObject(stateObject)
+		}
+		stateObject.dirty = false
 	}
 }
 

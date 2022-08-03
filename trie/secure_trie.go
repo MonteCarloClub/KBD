@@ -1,6 +1,8 @@
 package trie
 
-import "github.com/MonteCarloClub/KBD/crypto/sha3"
+import (
+	"github.com/MonteCarloClub/KBD/crypto"
+)
 
 var keyPrefix = []byte("secure-key-")
 
@@ -13,7 +15,7 @@ func NewSecure(root []byte, backend Backend) *SecureTrie {
 }
 
 func (self *SecureTrie) Update(key, value []byte) Node {
-	shaKey := sha3.Sha3(key)
+	shaKey := crypto.Sha3(key)
 	self.Trie.cache.Put(append(keyPrefix, shaKey...), key)
 
 	return self.Trie.Update(shaKey, value)
@@ -23,14 +25,14 @@ func (self *SecureTrie) UpdateString(key, value string) Node {
 }
 
 func (self *SecureTrie) Get(key []byte) []byte {
-	return self.Trie.Get(sha3.Sha3(key))
+	return self.Trie.Get(crypto.Sha3(key))
 }
 func (self *SecureTrie) GetString(key string) []byte {
 	return self.Get([]byte(key))
 }
 
 func (self *SecureTrie) Delete(key []byte) Node {
-	return self.Trie.Delete(sha3.Sha3(key))
+	return self.Trie.Delete(crypto.Sha3(key))
 }
 func (self *SecureTrie) DeleteString(key string) Node {
 	return self.Delete([]byte(key))

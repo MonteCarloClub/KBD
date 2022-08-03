@@ -45,19 +45,12 @@ func (self *LDBDatabase) makeQueue() {
 	self.queue = make(map[string][]byte)
 }
 
-func (self *LDBDatabase) Put(key []byte, value []byte) {
+func (self *LDBDatabase) Put(key []byte, value []byte) error {
 	self.mu.Lock()
 	defer self.mu.Unlock()
 
 	self.queue[string(key)] = value
-	/*
-		value = rle.Compress(value)
-
-		err := self.db.Put(key, value, nil)
-		if err != nil {
-			fmt.Println("Error put", err)
-		}
-	*/
+	return nil
 }
 
 func (self *LDBDatabase) Get(key []byte) ([]byte, error) {

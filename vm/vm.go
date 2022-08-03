@@ -507,14 +507,14 @@ func (self *Vm) Run(context *Context, input []byte) (ret []byte, err error) {
 
 		case SLOAD:
 			loc := common.BigToHash(stack.pop())
-			val := common.Bytes2Big(statedb.GetState(context.Address(), loc))
+			val := statedb.GetState(context.Address(), loc).Big()
 			stack.push(val)
 
 		case SSTORE:
 			loc := common.BigToHash(stack.pop())
 			val := stack.pop()
 
-			statedb.SetState(context.Address(), loc, val)
+			statedb.SetState(context.Address(), loc, common.BigToHash(val))
 
 		case JUMP:
 			if err := jump(pc, stack.pop()); err != nil {
@@ -690,8 +690,8 @@ func (self *Vm) calculateGasAndSize(context *Context, caller ContextRef, op OpCo
 		if len(val) == 0 && len(y.Bytes()) > 0 {
 			// 0 => non 0
 			g = params.SstoreSetGas
-		} else if len(val) > 0 && len(y.Bytes()) == 0 {
-			statedb.Refund(self.env.Origin(), params.SstoreRefundGas)
+		} else if !common.EmptyHash(val) && common.EmptyHash(common.BigToHash(y)) {
+			statedb.Refund(params.SstoreRefundGas)
 
 			g = params.SstoreClearGas
 		} else {
@@ -701,7 +701,7 @@ func (self *Vm) calculateGasAndSize(context *Context, caller ContextRef, op OpCo
 		gas.Set(g)
 	case SUICIDE:
 		if !statedb.IsDeleted(context.Address()) {
-			statedb.Refund(self.env.Origin(), params.SuicideRefundGas)
+			statedb.Refund(params.SuicideRefundGas)
 		}
 	case MLOAD:
 		newMemSize = calcMemSize(stack.peek(), u256(32))

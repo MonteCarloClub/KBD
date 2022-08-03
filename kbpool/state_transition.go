@@ -149,26 +149,22 @@ func (self *StateTransition) AddGas(amount *big.Int) {
 }
 
 func (self *StateTransition) BuyGas() error {
-	var err error
+	mgas := self.msg.Gas()
+	mgval := new(big.Int).Mul(mgas, self.gasPrice)
 
 	sender, err := self.From()
 	if err != nil {
 		return err
 	}
-	if sender.Balance().Cmp(MessageGasValue(self.msg)) < 0 {
-		return fmt.Errorf("insufficient ETH for gas (%x). Req %v, has %v", sender.Address().Bytes()[:4], MessageGasValue(self.msg), sender.Balance())
+	if sender.Balance().Cmp(mgval) < 0 {
+		return fmt.Errorf("insufficient ETH for gas (%x). Req %v, has %v", sender.Address().Bytes()[:4], mgval, sender.Balance())
 	}
-
-	coinbase := self.Coinbase()
-	err = coinbase.BuyGas(self.msg.Gas(), self.msg.GasPrice())
-	if err != nil {
+	if err = self.Coinbase().SubGas(mgas, self.gasPrice); err != nil {
 		return err
 	}
-
-	self.AddGas(self.msg.Gas())
-	self.initialGas.Set(self.msg.Gas())
-	sender.SubBalance(MessageGasValue(self.msg))
-
+	self.AddGas(mgas)
+	self.initialGas.Set(mgas)
+	sender.SubBalance(mgval)
 	return nil
 }
 
@@ -246,17 +242,15 @@ func (self *StateTransition) refundGas() {
 	coinbase := self.Coinbase()
 	sender, _ := self.From() // err already checked
 	// Return remaining gas
-	remaining := new(big.Int).Mul(self.gas, self.msg.GasPrice())
+	remaining := new(big.Int).Mul(self.gas, self.gasPrice)
 	sender.AddBalance(remaining)
 
-	uhalf := new(big.Int).Div(self.gasUsed(), common.Big2)
-	for addr, ref := range self.state.Refunds() {
-		refund := common.BigMin(uhalf, ref)
-		self.gas.Add(self.gas, refund)
-		self.state.AddBalance(common.StringToAddress(addr), refund.Mul(refund, self.msg.GasPrice()))
-	}
+	uhalf := remaining.Div(self.gasUsed(), common.Big2)
+	refund := common.BigMin(uhalf, self.state.Refunds())
+	self.gas.Add(self.gas, refund)
+	self.state.AddBalance(sender.Address(), refund.Mul(refund, self.gasPrice))
 
-	coinbase.RefundGas(self.gas, self.msg.GasPrice())
+	coinbase.AddGas(self.gas, self.gasPrice)
 }
 
 func (self *StateTransition) gasUsed() *big.Int {

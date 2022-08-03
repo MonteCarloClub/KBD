@@ -13,10 +13,10 @@ import (
 )
 
 type Account struct {
-	Balance  string            `json:"balance"`  //账户余额
-	Nonce    uint64            `json:"nonce"`    //账户交易数量
-	Root     string            `json:"root"`     //账户存储树的root根
-	CodeHash string            `json:"codeHash"` //EVM的代码哈希值
+	Balance  string            `json:"balance"`
+	Nonce    uint64            `json:"nonce"`
+	Root     string            `json:"root"`
+	CodeHash string            `json:"codeHash"`
 	Storage  map[string]string `json:"storage"`
 }
 
@@ -39,7 +39,7 @@ func (self *StateDB) RawDump() World {
 		account := Account{Balance: stateObject.balance.String(), Nonce: stateObject.nonce, Root: common.Bytes2Hex(stateObject.Root()), CodeHash: common.Bytes2Hex(stateObject.codeHash)}
 		account.Storage = make(map[string]string)
 
-		storageIt := stateObject.State.trie.Iterator()
+		storageIt := stateObject.trie.Iterator()
 		for storageIt.Next() {
 			account.Storage[common.Bytes2Hex(self.trie.GetKey(storageIt.Key))] = common.Bytes2Hex(storageIt.Value)
 		}
@@ -59,8 +59,8 @@ func (self *StateDB) Dump() []byte {
 
 // Debug stuff
 func (self *StateObject) CreateOutputForDiff() {
-	fmt.Printf("%x %x %x %x\n", self.Address(), self.State.Root(), self.balance.Bytes(), self.nonce)
-	it := self.State.trie.Iterator()
+	fmt.Printf("%x %x %x %x\n", self.Address(), self.Root(), self.balance.Bytes(), self.nonce)
+	it := self.trie.Iterator()
 	for it.Next() {
 		fmt.Printf("%x %x\n", it.Key, it.Value)
 	}

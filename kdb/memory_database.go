@@ -19,8 +19,9 @@ func NewMemDatabase() (*MemDatabase, error) {
 	return db, nil
 }
 
-func (db *MemDatabase) Put(key []byte, value []byte) {
+func (db *MemDatabase) Put(key []byte, value []byte) error {
 	db.db[string(key)] = value
+	return nil
 }
 
 func (db *MemDatabase) Set(key []byte, value []byte) {
@@ -64,4 +65,8 @@ func (db *MemDatabase) LastKnownTD() []byte {
 	}
 
 	return data
+}
+
+func (db *MemDatabase) Flush() error {
+	return nil
 }
