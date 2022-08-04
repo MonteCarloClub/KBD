@@ -1,10 +1,9 @@
 package crypto
 
 import (
-	"strings"
-
 	"github.com/MonteCarloClub/KBD/common"
 	"github.com/MonteCarloClub/KBD/crypto/secp256k1"
+	"strings"
 )
 
 type KeyPair struct {
