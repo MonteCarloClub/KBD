@@ -81,25 +81,6 @@ func (s *StateSuite) TestDB(c *checker.C) {
 	c.Log()
 }
 
-func (s *StateSuite) TestDB_goroutine(c *checker.C) {
-	db, _ := kdb.NewLDBDatabase("testDB")
-	start := time.Now().UnixNano()
-	state := New(common.Hash{}, db)
-	wg := &sync.WaitGroup{}
-	for i := 0; i < testTimes; i++ {
-		ti := i
-		fmt.Println(ti)
-		wg.Add(1)
-		go cal_g(wg, state)
-	}
-	wg.Wait()
-	useTime := time.Now().UnixNano() - start
-	time := float64(useTime) / 1e9
-	c.Log(time)
-	c.Log()
-	return
-}
-
 func (s *StateSuite) TestMemDB(c *checker.C) {
 	db, _ := kdb.NewMemDatabase()
 	start := time.Now().UnixNano()
@@ -107,21 +88,6 @@ func (s *StateSuite) TestMemDB(c *checker.C) {
 	for i := 0; i < testTimes; i++ {
 		cal(state)
 	}
-	useTime := time.Now().UnixNano() - start
-	time := float64(useTime) / 1e9
-	c.Log(time)
-}
-
-func (s *StateSuite) TestMemDB_goroutine(c *checker.C) {
-	db, _ := kdb.NewMemDatabase()
-	start := time.Now().UnixNano()
-	state := New(common.Hash{}, db)
-	wg := &sync.WaitGroup{}
-	for i := 0; i < testTimes; i++ {
-		wg.Add(1)
-		go cal_g(wg, state)
-	}
-	wg.Wait()
 	useTime := time.Now().UnixNano() - start
 	time := float64(useTime) / 1e9
 	c.Log(time)

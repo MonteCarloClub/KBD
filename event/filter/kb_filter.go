@@ -3,10 +3,10 @@ package filter
 // TODO make use of the generic filtering system
 
 import (
+	"github.com/MonteCarloClub/KBD/manager"
 	"sync"
 
 	"github.com/MonteCarloClub/KBD/event"
-	"github.com/MonteCarloClub/KBD/filter"
 	"github.com/MonteCarloClub/KBD/state"
 )
 
@@ -15,7 +15,7 @@ type FilterManager struct {
 
 	filterMu sync.RWMutex
 	filterId int
-	filters  map[int]*filter.Filter
+	filters  map[int]*manager.Filter
 
 	quit chan struct{}
 }
@@ -23,7 +23,7 @@ type FilterManager struct {
 func NewFilterManager(mux *event.TypeMux) *FilterManager {
 	return &FilterManager{
 		eventMux: mux,
-		filters:  make(map[int]*filter.Filter),
+		filters:  make(map[int]*manager.Filter),
 	}
 }
 
@@ -35,7 +35,7 @@ func (self *FilterManager) Stop() {
 	close(self.quit)
 }
 
-func (self *FilterManager) InstallFilter(filter *filter.Filter) (id int) {
+func (self *FilterManager) InstallFilter(filter *manager.Filter) (id int) {
 	self.filterMu.Lock()
 	defer self.filterMu.Unlock()
 	id = self.filterId
@@ -55,7 +55,7 @@ func (self *FilterManager) UninstallFilter(id int) {
 
 // GetFilter retrieves a filter installed using InstallFilter.
 // The filter may not be modified.
-func (self *FilterManager) GetFilter(id int) *filter.Filter {
+func (self *FilterManager) GetFilter(id int) *manager.Filter {
 	self.filterMu.RLock()
 	defer self.filterMu.RUnlock()
 	return self.filters[id]

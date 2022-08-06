@@ -1,8 +1,7 @@
-package filter
+package manager
 
 import (
 	"fmt"
-	"github.com/MonteCarloClub/KBD"
 	"math"
 
 	"github.com/MonteCarloClub/KBD/common"
@@ -16,7 +15,7 @@ type AccountChange struct {
 
 // Filtering interface
 type Filter struct {
-	kb       KBD.Backend
+	kb       Backend
 	earliest int64
 	latest   int64
 	skip     int
@@ -31,7 +30,7 @@ type Filter struct {
 
 // Create a new filter which uses a bloom filter on blocks to figure out whether a particular block
 // is interesting or not.
-func NewFilter(kb KBD.Backend) *Filter {
+func NewFilter(kb Backend) *Filter {
 	return &Filter{kb: kb}
 }
 
