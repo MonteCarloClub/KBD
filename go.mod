@@ -11,6 +11,7 @@ require (
 	github.com/jrick/logrotate v1.0.0
 	github.com/mr-tron/base58 v1.2.0
 	github.com/syndtr/goleveldb v1.0.1-0.20220614013038-64ee5596c38a
+	github.com/tidwall/gjson v1.14.2
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c
 )
@@ -19,5 +20,7 @@ require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/kr/pretty v0.2.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/pretty v1.2.0 // indirect
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 )

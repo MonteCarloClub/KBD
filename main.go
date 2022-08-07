@@ -16,8 +16,7 @@ var (
 
 func main() {
 	regs := []register{
-		{"GetAccountData", GetAccountData},
-		{"GetBlockData", GetBlockData},
+		{"GetFunc", GetFunc},
 	}
 	newServer(1233, regs)
 	wg := sync.WaitGroup{}
