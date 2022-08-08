@@ -148,13 +148,13 @@ func runStateTest(test VmTest) error {
 
 func RunState(statedb *state.StateDB, env, tx map[string]string) ([]byte, state.Logs, *big.Int, error) {
 	var (
-		keyPair = crypto.ToECDSA([]byte(common.Hex2Bytes(tx["secretKey"])))
-		data    = common.FromHex(tx["data"])
-		gas     = common.Big(tx["gasLimit"])
-		price   = common.Big(tx["gasPrice"])
-		value   = common.Big(tx["value"])
-		nonce   = common.Big(tx["nonce"]).Uint64()
-		caddr   = common.HexToAddress(env["currentCoinbase"])
+		key   = crypto.ToECDSA((common.Hex2Bytes(tx["secretKey"])))
+		data  = common.FromHex(tx["data"])
+		gas   = common.Big(tx["gasLimit"])
+		price = common.Big(tx["gasPrice"])
+		value = common.Big(tx["value"])
+		nonce = common.Big(tx["nonce"]).Uint64()
+		caddr = common.HexToAddress(env["currentCoinbase"])
 	)
 
 	var to *common.Address
@@ -169,9 +169,9 @@ func RunState(statedb *state.StateDB, env, tx map[string]string) ([]byte, state.
 	coinbase := statedb.GetOrNewStateObject(caddr)
 	coinbase.SetGasLimit(common.Big(env["currentGasLimit"]))
 
-	message := NewMessage(common.BytesToAddress(keyPair.D.Bytes()), to, data, value, gas, price, nonce)
+	message := NewMessage(crypto.PubkeyToAddress(key.PublicKey), to, data, value, gas, price, nonce)
 	vmenv := NewEnvFromMap(statedb, env, tx)
-	vmenv.origin = common.BytesToAddress(keyPair.D.Bytes())
+	vmenv.origin = crypto.PubkeyToAddress(key.PublicKey)
 	ret, _, err := kbpool.ApplyMessage(vmenv, message, coinbase)
 	if block_error.IsNonceErr(err) || block_error.IsInvalidTxErr(err) || state.IsGasLimitErr(err) {
 		statedb.Set(snapshot)
