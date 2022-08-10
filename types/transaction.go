@@ -10,7 +10,6 @@ import (
 
 	"github.com/MonteCarloClub/KBD/common"
 	"github.com/MonteCarloClub/KBD/crypto"
-	"github.com/MonteCarloClub/KBD/crypto/sha3"
 	"github.com/MonteCarloClub/KBD/rlp"
 )
 
@@ -150,7 +149,7 @@ func (tx *Transaction) From() (common.Address, error) {
 		return common.Address{}, err
 	}
 	var addr common.Address
-	copy(addr[:], sha3.Sha3(pubkey[1:])[12:])
+	copy(addr[:], crypto.Sha3(pubkey[1:])[12:])
 	tx.from.Store(addr)
 	return addr, nil
 }

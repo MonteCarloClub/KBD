@@ -148,7 +148,7 @@ func runStateTest(test VmTest) error {
 
 func RunState(statedb *state.StateDB, env, tx map[string]string) ([]byte, state.Logs, *big.Int, error) {
 	var (
-		key   = crypto.ToECDSA((common.Hex2Bytes(tx["secretKey"])))
+		key   = crypto.ToECDSA(common.Hex2Bytes(tx["secretKey"]))
 		data  = common.FromHex(tx["data"])
 		gas   = common.Big(tx["gasLimit"])
 		price = common.Big(tx["gasPrice"])
