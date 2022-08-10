@@ -1,4 +1,4 @@
-package KBD
+package main
 
 import (
 	"github.com/MonteCarloClub/KBD/accounts"

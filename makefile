@@ -1,0 +1,30 @@
+project = github.com/MonteCarloClub/KBD
+
+idl_path = $(GOPATH)/src/github.com/MonteCarloClub/KBD/kdb.thrift
+project_path = github.com/MonteCarloClub/KBD
+
+help: Makefile
+	@echo
+	@echo " Choose a command run:"
+	@echo "   build    编译项目"
+	@echo "   clean    清理文件"
+	@echo "   run      运行项目"
+	@echo "   cli      生成客户端代码"
+	@echo "   server   生成server端代码"
+
+
+build:
+	sh ./build.sh
+
+clean:
+	rm -rf output
+
+run: build
+	./output/bootstrap.sh
+
+cli:
+	kitex -module $(project_path)  ${idl_path}
+
+idl:
+	kitex -module $(project_path) -service $(project)  ${idl_path}
+
