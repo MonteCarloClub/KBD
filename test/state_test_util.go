@@ -112,7 +112,7 @@ func runStateTest(test VmTest) error {
 		if obj == nil {
 			continue
 		}
-
+		fmt.Println(obj.Balance(), " \t", common.Big(account.Balance))
 		if obj.Balance().Cmp(common.Big(account.Balance)) != 0 {
 			return fmt.Errorf("(%x) balance failed. Expected %v, got %v => %v\n", obj.Address().Bytes()[:4], account.Balance, obj.Balance(), new(big.Int).Sub(common.Big(account.Balance), obj.Balance()))
 		}
