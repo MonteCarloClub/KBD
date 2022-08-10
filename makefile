@@ -1,7 +1,7 @@
-project = github.com/MonteCarloClub/KBD
+psm = montecarloclub.kanban.kbd
 
 idl_path = $(GOPATH)/src/github.com/MonteCarloClub/KBD/kdb.thrift
-project_path = github.com/MonteCarloClub/KBD
+psm_path = github.com/MonteCarloClub/KBD
 
 help: Makefile
 	@echo
@@ -23,8 +23,8 @@ run: build
 	./output/bootstrap.sh
 
 cli:
-	kitex -module $(project_path)  ${idl_path}
+	kitex -module $(psm_path)  ${idl_path}
 
 idl:
-	kitex -module $(project_path) -service $(project)  ${idl_path}
+	kitex -module $(psm_path) -service $(psm)  ${idl_path}
 
