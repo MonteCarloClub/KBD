@@ -1,10 +1,9 @@
-package exe
+package execution
 
 import (
-	"errors"
-	"fmt"
 	"math/big"
 
+	. "github.com/MonteCarloClub/KBD/block_error"
 	"github.com/MonteCarloClub/KBD/common"
 	"github.com/MonteCarloClub/KBD/crypto"
 	"github.com/MonteCarloClub/KBD/params"
@@ -55,7 +54,7 @@ func (self *Execution) exec(contextAddr *common.Address, code []byte, caller vm.
 	if env.Depth() > int(params.CallCreateDepth.Int64()) {
 		caller.ReturnGas(self.Gas, self.price)
 
-		return nil, errors.New("DepthError")
+		return nil, vm.DepthError
 	}
 
 	vsnapshot := env.State().Copy()
@@ -88,7 +87,7 @@ func (self *Execution) exec(contextAddr *common.Address, code []byte, caller vm.
 
 		caller.ReturnGas(self.Gas, self.price)
 
-		return nil, errors.New(fmt.Sprintf("insufficient funds to transfer value. Req %v, has %v", self.value, from.Balance()))
+		return nil, ValueTransferErr("insufficient funds to transfer value. Req %v, has %v", self.value, from.Balance())
 	}
 
 	context := vm.NewContext(caller, to, self.value, self.Gas, self.price)
