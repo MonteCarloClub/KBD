@@ -9,29 +9,50 @@ import (
 	"strings"
 )
 
-type GetAccountDataRequest struct {
-	Account string `thrift:"account,1" json:"account"`
+type Account struct {
+	Address string `thrift:"Address,1,required" json:"Address"`
+	Balance int64  `thrift:"balance,2,required" json:"balance"`
+	Nonce   int64  `thrift:"nonce,3,required" json:"nonce"`
 }
 
-func NewGetAccountDataRequest() *GetAccountDataRequest {
-	return &GetAccountDataRequest{}
+func NewAccount() *Account {
+	return &Account{}
 }
 
-func (p *GetAccountDataRequest) GetAccount() (v string) {
-	return p.Account
-}
-func (p *GetAccountDataRequest) SetAccount(val string) {
-	p.Account = val
+func (p *Account) GetAddress() (v string) {
+	return p.Address
 }
 
-var fieldIDToName_GetAccountDataRequest = map[int16]string{
-	1: "account",
+func (p *Account) GetBalance() (v int64) {
+	return p.Balance
 }
 
-func (p *GetAccountDataRequest) Read(iprot thrift.TProtocol) (err error) {
+func (p *Account) GetNonce() (v int64) {
+	return p.Nonce
+}
+func (p *Account) SetAddress(val string) {
+	p.Address = val
+}
+func (p *Account) SetBalance(val int64) {
+	p.Balance = val
+}
+func (p *Account) SetNonce(val int64) {
+	p.Nonce = val
+}
+
+var fieldIDToName_Account = map[int16]string{
+	1: "Address",
+	2: "balance",
+	3: "nonce",
+}
+
+func (p *Account) Read(iprot thrift.TProtocol) (err error) {
 
 	var fieldTypeId thrift.TType
 	var fieldId int16
+	var issetAddress bool = false
+	var issetBalance bool = false
+	var issetNonce bool = false
 
 	if _, err = iprot.ReadStructBegin(); err != nil {
 		goto ReadStructBeginError
@@ -52,6 +73,29 @@ func (p *GetAccountDataRequest) Read(iprot thrift.TProtocol) (err error) {
 				if err = p.ReadField1(iprot); err != nil {
 					goto ReadFieldError
 				}
+				issetAddress = true
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
+		case 2:
+			if fieldTypeId == thrift.I64 {
+				if err = p.ReadField2(iprot); err != nil {
+					goto ReadFieldError
+				}
+				issetBalance = true
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
+		case 3:
+			if fieldTypeId == thrift.I64 {
+				if err = p.ReadField3(iprot); err != nil {
+					goto ReadFieldError
+				}
+				issetNonce = true
 			} else {
 				if err = iprot.Skip(fieldTypeId); err != nil {
 					goto SkipFieldError
@@ -71,6 +115,268 @@ func (p *GetAccountDataRequest) Read(iprot thrift.TProtocol) (err error) {
 		goto ReadStructEndError
 	}
 
+	if !issetAddress {
+		fieldId = 1
+		goto RequiredFieldNotSetError
+	}
+
+	if !issetBalance {
+		fieldId = 2
+		goto RequiredFieldNotSetError
+	}
+
+	if !issetNonce {
+		fieldId = 3
+		goto RequiredFieldNotSetError
+	}
+	return nil
+ReadStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct begin error: ", p), err)
+ReadFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d begin error: ", p, fieldId), err)
+ReadFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T read field %d '%s' error: ", p, fieldId, fieldIDToName_Account[fieldId]), err)
+SkipFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T field %d skip type %d error: ", p, fieldId, fieldTypeId), err)
+
+ReadFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read field end error", p), err)
+ReadStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+RequiredFieldNotSetError:
+	return thrift.NewTProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("required field %s is not set", fieldIDToName_Account[fieldId]))
+}
+
+func (p *Account) ReadField1(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadString(); err != nil {
+		return err
+	} else {
+		p.Address = v
+	}
+	return nil
+}
+
+func (p *Account) ReadField2(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadI64(); err != nil {
+		return err
+	} else {
+		p.Balance = v
+	}
+	return nil
+}
+
+func (p *Account) ReadField3(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadI64(); err != nil {
+		return err
+	} else {
+		p.Nonce = v
+	}
+	return nil
+}
+
+func (p *Account) Write(oprot thrift.TProtocol) (err error) {
+	var fieldId int16
+	if err = oprot.WriteStructBegin("Account"); err != nil {
+		goto WriteStructBeginError
+	}
+	if p != nil {
+		if err = p.writeField1(oprot); err != nil {
+			fieldId = 1
+			goto WriteFieldError
+		}
+		if err = p.writeField2(oprot); err != nil {
+			fieldId = 2
+			goto WriteFieldError
+		}
+		if err = p.writeField3(oprot); err != nil {
+			fieldId = 3
+			goto WriteFieldError
+		}
+
+	}
+	if err = oprot.WriteFieldStop(); err != nil {
+		goto WriteFieldStopError
+	}
+	if err = oprot.WriteStructEnd(); err != nil {
+		goto WriteStructEndError
+	}
+	return nil
+WriteStructBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err)
+WriteFieldError:
+	return thrift.PrependError(fmt.Sprintf("%T write field %d error: ", p, fieldId), err)
+WriteFieldStopError:
+	return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", p), err)
+WriteStructEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", p), err)
+}
+
+func (p *Account) writeField1(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("Address", thrift.STRING, 1); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteString(p.Address); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
+}
+
+func (p *Account) writeField2(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("balance", thrift.I64, 2); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteI64(p.Balance); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
+}
+
+func (p *Account) writeField3(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("nonce", thrift.I64, 3); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteI64(p.Nonce); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 end error: ", p), err)
+}
+
+func (p *Account) String() string {
+	if p == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("Account(%+v)", *p)
+}
+
+func (p *Account) DeepEqual(ano *Account) bool {
+	if p == ano {
+		return true
+	} else if p == nil || ano == nil {
+		return false
+	}
+	if !p.Field1DeepEqual(ano.Address) {
+		return false
+	}
+	if !p.Field2DeepEqual(ano.Balance) {
+		return false
+	}
+	if !p.Field3DeepEqual(ano.Nonce) {
+		return false
+	}
+	return true
+}
+
+func (p *Account) Field1DeepEqual(src string) bool {
+
+	if strings.Compare(p.Address, src) != 0 {
+		return false
+	}
+	return true
+}
+func (p *Account) Field2DeepEqual(src int64) bool {
+
+	if p.Balance != src {
+		return false
+	}
+	return true
+}
+func (p *Account) Field3DeepEqual(src int64) bool {
+
+	if p.Nonce != src {
+		return false
+	}
+	return true
+}
+
+type GetAccountDataRequest struct {
+	Address string `thrift:"address,1,required" json:"address"`
+}
+
+func NewGetAccountDataRequest() *GetAccountDataRequest {
+	return &GetAccountDataRequest{}
+}
+
+func (p *GetAccountDataRequest) GetAddress() (v string) {
+	return p.Address
+}
+func (p *GetAccountDataRequest) SetAddress(val string) {
+	p.Address = val
+}
+
+var fieldIDToName_GetAccountDataRequest = map[int16]string{
+	1: "address",
+}
+
+func (p *GetAccountDataRequest) Read(iprot thrift.TProtocol) (err error) {
+
+	var fieldTypeId thrift.TType
+	var fieldId int16
+	var issetAddress bool = false
+
+	if _, err = iprot.ReadStructBegin(); err != nil {
+		goto ReadStructBeginError
+	}
+
+	for {
+		_, fieldTypeId, fieldId, err = iprot.ReadFieldBegin()
+		if err != nil {
+			goto ReadFieldBeginError
+		}
+		if fieldTypeId == thrift.STOP {
+			break
+		}
+
+		switch fieldId {
+		case 1:
+			if fieldTypeId == thrift.STRING {
+				if err = p.ReadField1(iprot); err != nil {
+					goto ReadFieldError
+				}
+				issetAddress = true
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
+		default:
+			if err = iprot.Skip(fieldTypeId); err != nil {
+				goto SkipFieldError
+			}
+		}
+
+		if err = iprot.ReadFieldEnd(); err != nil {
+			goto ReadFieldEndError
+		}
+	}
+	if err = iprot.ReadStructEnd(); err != nil {
+		goto ReadStructEndError
+	}
+
+	if !issetAddress {
+		fieldId = 1
+		goto RequiredFieldNotSetError
+	}
 	return nil
 ReadStructBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T read struct begin error: ", p), err)
@@ -85,13 +391,15 @@ ReadFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T read field end error", p), err)
 ReadStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+RequiredFieldNotSetError:
+	return thrift.NewTProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("required field %s is not set", fieldIDToName_GetAccountDataRequest[fieldId]))
 }
 
 func (p *GetAccountDataRequest) ReadField1(iprot thrift.TProtocol) error {
 	if v, err := iprot.ReadString(); err != nil {
 		return err
 	} else {
-		p.Account = v
+		p.Address = v
 	}
 	return nil
 }
@@ -126,10 +434,10 @@ WriteStructEndError:
 }
 
 func (p *GetAccountDataRequest) writeField1(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("account", thrift.STRING, 1); err != nil {
+	if err = oprot.WriteFieldBegin("address", thrift.STRING, 1); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteString(p.Account); err != nil {
+	if err := oprot.WriteString(p.Address); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -155,7 +463,7 @@ func (p *GetAccountDataRequest) DeepEqual(ano *GetAccountDataRequest) bool {
 	} else if p == nil || ano == nil {
 		return false
 	}
-	if !p.Field1DeepEqual(ano.Account) {
+	if !p.Field1DeepEqual(ano.Address) {
 		return false
 	}
 	return true
@@ -163,14 +471,15 @@ func (p *GetAccountDataRequest) DeepEqual(ano *GetAccountDataRequest) bool {
 
 func (p *GetAccountDataRequest) Field1DeepEqual(src string) bool {
 
-	if strings.Compare(p.Account, src) != 0 {
+	if strings.Compare(p.Address, src) != 0 {
 		return false
 	}
 	return true
 }
 
 type GetAccountDataResponse struct {
-	Message string `thrift:"message,1" json:"message"`
+	Message string   `thrift:"message,1,required" json:"message"`
+	Account *Account `thrift:"account,2,required" json:"account"`
 }
 
 func NewGetAccountDataResponse() *GetAccountDataResponse {
@@ -180,18 +489,37 @@ func NewGetAccountDataResponse() *GetAccountDataResponse {
 func (p *GetAccountDataResponse) GetMessage() (v string) {
 	return p.Message
 }
+
+var GetAccountDataResponse_Account_DEFAULT *Account
+
+func (p *GetAccountDataResponse) GetAccount() (v *Account) {
+	if !p.IsSetAccount() {
+		return GetAccountDataResponse_Account_DEFAULT
+	}
+	return p.Account
+}
 func (p *GetAccountDataResponse) SetMessage(val string) {
 	p.Message = val
+}
+func (p *GetAccountDataResponse) SetAccount(val *Account) {
+	p.Account = val
 }
 
 var fieldIDToName_GetAccountDataResponse = map[int16]string{
 	1: "message",
+	2: "account",
+}
+
+func (p *GetAccountDataResponse) IsSetAccount() bool {
+	return p.Account != nil
 }
 
 func (p *GetAccountDataResponse) Read(iprot thrift.TProtocol) (err error) {
 
 	var fieldTypeId thrift.TType
 	var fieldId int16
+	var issetMessage bool = false
+	var issetAccount bool = false
 
 	if _, err = iprot.ReadStructBegin(); err != nil {
 		goto ReadStructBeginError
@@ -212,6 +540,18 @@ func (p *GetAccountDataResponse) Read(iprot thrift.TProtocol) (err error) {
 				if err = p.ReadField1(iprot); err != nil {
 					goto ReadFieldError
 				}
+				issetMessage = true
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
+		case 2:
+			if fieldTypeId == thrift.STRUCT {
+				if err = p.ReadField2(iprot); err != nil {
+					goto ReadFieldError
+				}
+				issetAccount = true
 			} else {
 				if err = iprot.Skip(fieldTypeId); err != nil {
 					goto SkipFieldError
@@ -231,6 +571,15 @@ func (p *GetAccountDataResponse) Read(iprot thrift.TProtocol) (err error) {
 		goto ReadStructEndError
 	}
 
+	if !issetMessage {
+		fieldId = 1
+		goto RequiredFieldNotSetError
+	}
+
+	if !issetAccount {
+		fieldId = 2
+		goto RequiredFieldNotSetError
+	}
 	return nil
 ReadStructBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T read struct begin error: ", p), err)
@@ -245,6 +594,8 @@ ReadFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T read field end error", p), err)
 ReadStructEndError:
 	return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+RequiredFieldNotSetError:
+	return thrift.NewTProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("required field %s is not set", fieldIDToName_GetAccountDataResponse[fieldId]))
 }
 
 func (p *GetAccountDataResponse) ReadField1(iprot thrift.TProtocol) error {
@@ -252,6 +603,14 @@ func (p *GetAccountDataResponse) ReadField1(iprot thrift.TProtocol) error {
 		return err
 	} else {
 		p.Message = v
+	}
+	return nil
+}
+
+func (p *GetAccountDataResponse) ReadField2(iprot thrift.TProtocol) error {
+	p.Account = NewAccount()
+	if err := p.Account.Read(iprot); err != nil {
+		return err
 	}
 	return nil
 }
@@ -264,6 +623,10 @@ func (p *GetAccountDataResponse) Write(oprot thrift.TProtocol) (err error) {
 	if p != nil {
 		if err = p.writeField1(oprot); err != nil {
 			fieldId = 1
+			goto WriteFieldError
+		}
+		if err = p.writeField2(oprot); err != nil {
+			fieldId = 2
 			goto WriteFieldError
 		}
 
@@ -302,6 +665,23 @@ WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 1 end error: ", p), err)
 }
 
+func (p *GetAccountDataResponse) writeField2(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("account", thrift.STRUCT, 2); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := p.Account.Write(oprot); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
+}
+
 func (p *GetAccountDataResponse) String() string {
 	if p == nil {
 		return "<nil>"
@@ -318,12 +698,22 @@ func (p *GetAccountDataResponse) DeepEqual(ano *GetAccountDataResponse) bool {
 	if !p.Field1DeepEqual(ano.Message) {
 		return false
 	}
+	if !p.Field2DeepEqual(ano.Account) {
+		return false
+	}
 	return true
 }
 
 func (p *GetAccountDataResponse) Field1DeepEqual(src string) bool {
 
 	if strings.Compare(p.Message, src) != 0 {
+		return false
+	}
+	return true
+}
+func (p *GetAccountDataResponse) Field2DeepEqual(src *Account) bool {
+
+	if !p.Account.DeepEqual(src) {
 		return false
 	}
 	return true
