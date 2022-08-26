@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"math/big"
+	"path"
 	"strconv"
 
 	"github.com/MonteCarloClub/KBD/block_error"
@@ -68,7 +69,8 @@ func runStateTests(tests map[string]VmTest, skipTests []string) error {
 }
 
 func runStateTest(test VmTest) error {
-	db, _ := kdb.NewMemDatabase()
+	file := path.Join("/", "tmp", "ldbtesttmpfile")
+	db, _ := kdb.NewLDBDatabase(file)
 	statedb := state.New(common.Hash{}, db)
 	for addr, account := range test.Pre {
 		obj := StateObjectFromAccount(db, addr, account)
@@ -142,7 +144,7 @@ func runStateTest(test VmTest) error {
 			return err
 		}
 	}
-
+	db.Close()
 	return nil
 }
 
