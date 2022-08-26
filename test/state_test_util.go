@@ -11,6 +11,7 @@ import (
 	"github.com/MonteCarloClub/KBD/block_error"
 	"github.com/MonteCarloClub/KBD/common"
 	"github.com/MonteCarloClub/KBD/common/logger/glog"
+	"github.com/MonteCarloClub/KBD/constant"
 	"github.com/MonteCarloClub/KBD/crypto"
 	"github.com/MonteCarloClub/KBD/kbpool"
 	"github.com/MonteCarloClub/KBD/kdb"
@@ -69,7 +70,7 @@ func runStateTests(tests map[string]VmTest, skipTests []string) error {
 }
 
 func runStateTest(test VmTest) error {
-	file := path.Join("/", "tmp", "ldbtesttmpfile")
+	file := path.Join("/", constant.DBDir, constant.DBFile)
 	db, _ := kdb.NewLDBDatabase(file)
 	statedb := state.New(common.Hash{}, db)
 	for addr, account := range test.Pre {

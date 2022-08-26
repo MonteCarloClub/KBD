@@ -7,7 +7,7 @@ struct Account {
 }
 
 struct GetAccountDataRequest {
-    1: required string address
+    1: required string address (api.query = 'address')
 }
 
 struct GetAccountDataResponse {
