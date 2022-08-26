@@ -1,6 +1,6 @@
 module github.com/MonteCarloClub/KBD
 
-go 1.18
+go 1.17
 
 require (
 	github.com/apache/thrift v0.13.0
