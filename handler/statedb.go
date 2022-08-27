@@ -10,6 +10,7 @@ import (
 
 // GetAccountData implements the KanBanDatabaseImpl interface.
 func GetAccountData(ctx context.Context, req *api.GetAccountDataRequest) (resp *api.GetAccountDataResponse, err error) {
+	resp = &api.GetAccountDataResponse{}
 	if req.Address == "" {
 		return nil, fmt.Errorf("wrong account")
 	}

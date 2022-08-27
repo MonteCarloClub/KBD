@@ -12,7 +12,7 @@ struct GetAccountDataRequest {
 
 struct GetAccountDataResponse {
     1: required string message
-    2: required Account account
+    2: optional Account account
 }
 
 service kanBanDatabase {

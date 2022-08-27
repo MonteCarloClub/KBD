@@ -6,6 +6,9 @@ import (
 )
 
 func StateObject2VO(obj *state.StateObject) *api.Account {
+	if obj == nil {
+		return nil
+	}
 	return &api.Account{
 		Address: obj.Address().Str(),
 		Balance: obj.Balance().Int64(),
