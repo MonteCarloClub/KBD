@@ -7,7 +7,7 @@ struct Account {
 }
 
 struct GetAccountDataRequest {
-    1: required string address (api.query = 'address')
+    1: required string address
 }
 
 struct GetAccountDataResponse {
@@ -16,5 +16,5 @@ struct GetAccountDataResponse {
 }
 
 service kanBanDatabase {
-    GetAccountDataResponse GetAccountData(1:  GetAccountDataRequest req) (api.get = '/info/account')
+    GetAccountDataResponse GetAccountData(1:  GetAccountDataRequest req)
 }

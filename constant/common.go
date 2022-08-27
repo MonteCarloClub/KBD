@@ -2,4 +2,4 @@ package constant
 
 const DBFile = "ldbtmpfile"
 
-const DBDir = "tmp"
+const DBDir = "/tmp"
