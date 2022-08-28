@@ -4,6 +4,7 @@ import (
 	"fmt"
 	. "github.com/MonteCarloClub/KBD/block_error"
 	"github.com/MonteCarloClub/KBD/metrics"
+	"github.com/astaxie/beego/logs"
 	"io"
 	"math/big"
 	"runtime"
@@ -12,8 +13,6 @@ import (
 	"time"
 
 	"github.com/MonteCarloClub/KBD/common"
-	"github.com/MonteCarloClub/KBD/common/logger"
-	"github.com/MonteCarloClub/KBD/common/logger/glog"
 	"github.com/MonteCarloClub/KBD/event"
 	"github.com/MonteCarloClub/KBD/pow"
 	"github.com/MonteCarloClub/KBD/rlp"
@@ -23,9 +22,6 @@ import (
 )
 
 var (
-	chainlogger = logger.NewLogger("CHAIN")
-	jsonlogger  = logger.NewJsonLogger()
-
 	blockHashPre = []byte("block-hash-")
 	blockNumPre  = []byte("block-num-")
 
@@ -95,14 +91,14 @@ func NewChainManager(genesis *types.Block, blockDb, stateDb, extraDb common.Data
 	// Check the current state of the block hashes and make sure that we do not have any of the bad blocks in our chain
 	for hash, _ := range BadHashes {
 		if block := bc.GetBlock(hash); block != nil {
-			glog.V(logger.Error).Infof("Found bad hash. Reorganising chain to state %x\n", block.ParentHash().Bytes()[:4])
+			logs.Info("Found bad hash. Reorganising chain to state %x\n", block.ParentHash().Bytes()[:4])
 			block = bc.GetBlock(block.ParentHash())
 			if block == nil {
-				glog.Fatal("Unable to complete. Parent block not found. Corrupted DB?")
+				logs.Error("Unable to complete. Parent block not found. Corrupted DB?")
 			}
 			bc.SetHead(block)
 
-			glog.V(logger.Error).Infoln("Chain reorg was successfull. Resuming normal operation")
+			logs.Error("Chain reorg was successfull. Resuming normal operation")
 		}
 	}
 
@@ -199,7 +195,7 @@ func (bc *ChainManager) recover() bool {
 		if block != nil {
 			err := bc.blockDb.Put([]byte("LastBlock"), block.Hash().Bytes())
 			if err != nil {
-				glog.Fatalln("db write err:", err)
+				logs.Error("db write err:%v", err)
 			}
 
 			bc.currentBlock = block
@@ -218,11 +214,11 @@ func (bc *ChainManager) setLastState() {
 			bc.currentBlock = block
 			bc.lastBlockHash = block.Hash()
 		} else {
-			glog.Infof("LastBlock (%x) not found. Recovering...\n", data)
+			logs.Info("LastBlock (%x) not found. Recovering...\n", data)
 			if bc.recover() {
-				glog.Infof("Recover successful")
+				logs.Info("Recover successful")
 			} else {
-				glog.Fatalf("Recover failed. Please report")
+				logs.Info("Recover failed. Please report")
 			}
 		}
 	} else {
@@ -230,10 +226,7 @@ func (bc *ChainManager) setLastState() {
 	}
 	bc.td = bc.currentBlock.Td
 	bc.currentGasLimit = CalcGasLimit(bc.currentBlock)
-
-	if glog.V(logger.Info) {
-		glog.Infof("Last block (#%v) %x TD=%v\n", bc.currentBlock.Number(), bc.currentBlock.Hash(), bc.td)
-	}
+	logs.Info("Last block (#%v) %x TD=%v\n", bc.currentBlock.Number(), bc.currentBlock.Hash(), bc.td)
 }
 
 func (bc *ChainManager) makeCache() {
@@ -303,7 +296,7 @@ func (self *ChainManager) ExportN(w io.Writer, first uint64, last uint64) error 
 		return fmt.Errorf("export failed: first (%d) is greater than last (%d)", first, last)
 	}
 
-	glog.V(logger.Info).Infof("exporting %d blocks...\n", last-first+1)
+	logs.Info("exporting %d blocks...\n", last-first+1)
 
 	for nr := first; nr <= last; nr++ {
 		block := self.GetBlockByNumber(nr)
@@ -324,14 +317,14 @@ func (self *ChainManager) ExportN(w io.Writer, first uint64, last uint64) error 
 func (bc *ChainManager) insert(block *types.Block) {
 	err := WriteHead(bc.blockDb, block)
 	if err != nil {
-		glog.Fatal("db write fail:", err)
+		logs.Error("db write fail:%v", err)
 	}
 
 	bc.checkpoint++
 	if bc.checkpoint > checkpointLimit {
 		err = bc.blockDb.Put([]byte("checkpoint"), block.Hash().Bytes())
 		if err != nil {
-			glog.Fatal("db write fail:", err)
+			logs.Error("db write fail:%v", err)
 		}
 
 		bc.checkpoint = 0
@@ -348,12 +341,9 @@ func (bc *ChainManager) write(block *types.Block) {
 	key := append(blockHashPre, block.Hash().Bytes()...)
 	err := bc.blockDb.Put(key, enc)
 	if err != nil {
-		glog.Fatal("db write fail:", err)
+		logs.Error("db write fail:%v", err)
 	}
-
-	if glog.V(logger.Debug) {
-		glog.Infof("wrote block #%v %s. Took %v\n", block.Number(), common.PP(block.Hash().Bytes()), time.Since(tstart))
-	}
+	logs.Debug("wrote block #%v %s. Took %v\n", block.Number(), common.PP(block.Hash().Bytes()), time.Since(tstart))
 }
 
 // Accessors
@@ -455,7 +445,7 @@ func (bc *ChainManager) Stop() {
 
 	bc.wg.Wait()
 
-	glog.V(logger.Info).Infoln("Chain manager stopped")
+	logs.Info("Chain manager stopped")
 }
 
 type queueEvent struct {
@@ -556,7 +546,7 @@ func (self *ChainManager) InsertChain(chain types.Blocks) (int, error) {
 	txcount := 0
 	for i, block := range chain {
 		if atomic.LoadInt32(&self.procInterrupt) == 1 {
-			glog.V(logger.Debug).Infoln("Premature abort during chain processing")
+			logs.Info("Premature abort during chain processing")
 			break
 		}
 
@@ -584,7 +574,7 @@ func (self *ChainManager) InsertChain(chain types.Blocks) (int, error) {
 
 		// Call in to the block processor and check for errors. It's likely that if one block fails
 		// all others will fail too (unless a known block is returned).
-		logs, receipts, err := self.processor.Process(block)
+		receipts, err := self.processor.Process(block)
 		if err != nil {
 			if IsKnownBlockErr(err) {
 				stats.ignored++
@@ -626,10 +616,8 @@ func (self *ChainManager) InsertChain(chain types.Blocks) (int, error) {
 		}
 		switch status {
 		case CanonStatTy:
-			if glog.V(logger.Debug) {
-				glog.Infof("[%v] inserted block #%d (%d TXs %d UNCs) (%x...). Took %v\n", time.Now().UnixNano(), block.Number(), len(block.Transactions()), len(block.Uncles()), block.Hash().Bytes()[0:4], time.Since(bstart))
-			}
-			queue[i] = ChainEvent{block, block.Hash(), logs}
+			logs.Debug("[%v] inserted block #%d (%d TXs %d UNCs) (%x...). Took %v\n", time.Now().UnixNano(), block.Number(), len(block.Transactions()), len(block.Uncles()), block.Hash().Bytes()[0:4], time.Since(bstart))
+			queue[i] = ChainEvent{block, block.Hash()}
 			queueEvent.canonicalCount++
 
 			// This puts transactions in a extra db for rpc
@@ -637,22 +625,20 @@ func (self *ChainManager) InsertChain(chain types.Blocks) (int, error) {
 			// store the receipts
 			PutReceipts(self.extraDb, receipts)
 		case SideStatTy:
-			if glog.V(logger.Detail) {
-				glog.Infof("inserted forked block #%d (TD=%v) (%d TXs %d UNCs) (%x...). Took %v\n", block.Number(), block.Difficulty(), len(block.Transactions()), len(block.Uncles()), block.Hash().Bytes()[0:4], time.Since(bstart))
-			}
-			queue[i] = ChainSideEvent{block, logs}
+			logs.Debug("inserted forked block #%d (TD=%v) (%d TXs %d UNCs) (%x...). Took %v\n", block.Number(), block.Difficulty(), len(block.Transactions()), len(block.Uncles()), block.Hash().Bytes()[0:4], time.Since(bstart))
+			queue[i] = ChainSideEvent{block}
 			queueEvent.sideCount++
 		case SplitStatTy:
-			queue[i] = ChainSplitEvent{block, logs}
+			queue[i] = ChainSplitEvent{block}
 			queueEvent.splitCount++
 		}
 		stats.processed++
 	}
 
-	if (stats.queued > 0 || stats.processed > 0 || stats.ignored > 0) && bool(glog.V(logger.Info)) {
+	if stats.queued > 0 || stats.processed > 0 || stats.ignored > 0 {
 		tend := time.Since(tstart)
 		start, end := chain[0], chain[len(chain)-1]
-		glog.Infof("imported %d block(s) (%d queued %d ignored) including %d txs in %v. #%v [%x / %x]\n", stats.processed, stats.queued, stats.ignored, txcount, tend, end.Number(), start.Hash().Bytes()[:4], end.Hash().Bytes()[:4])
+		logs.Debug("imported %d block(s) (%d queued %d ignored) including %d txs in %v. #%v [%x / %x]\n", stats.processed, stats.queued, stats.ignored, txcount, tend, end.Number(), start.Hash().Bytes()[:4], end.Hash().Bytes()[:4])
 	}
 
 	go self.eventMux.Post(queueEvent)
@@ -705,10 +691,8 @@ func (self *ChainManager) diff(oldBlock, newBlock *types.Block) (types.Blocks, e
 		}
 	}
 
-	if glog.V(logger.Debug) {
-		commonHash := commonBlock.Hash()
-		glog.Infof("Chain split detected @ %x. Reorganising chain from #%v %x to %x", commonHash[:4], numSplit, oldStart.Hash().Bytes()[:4], newStart.Hash().Bytes()[:4])
-	}
+	commonHash := commonBlock.Hash()
+	logs.Debug("Chain split detected @ %x. Reorganising chain from #%v %x to %x", commonHash[:4], numSplit, oldStart.Hash().Bytes()[:4], newStart.Hash().Bytes()[:4])
 
 	return newChain, nil
 }
@@ -763,9 +747,8 @@ out:
 
 func blockErr(block *types.Block, err error) {
 	h := block.Header()
-	glog.V(logger.Error).Infof("Bad block #%v (%x)\n", h.Number, h.Hash().Bytes())
-	glog.V(logger.Error).Infoln(err)
-	glog.V(logger.Debug).Infoln(verifyNonces)
+	logs.Error("Bad block #%v (%x)\n err:%v", h.Number, h.Hash().Bytes(), err)
+	logs.Debug("%v", verifyNonces)
 }
 
 type nonceResult struct {

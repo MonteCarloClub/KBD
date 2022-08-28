@@ -10,13 +10,13 @@ import (
 
 	"github.com/MonteCarloClub/KBD/block_error"
 	"github.com/MonteCarloClub/KBD/common"
-	"github.com/MonteCarloClub/KBD/common/logger/glog"
 	"github.com/MonteCarloClub/KBD/constant"
 	"github.com/MonteCarloClub/KBD/crypto"
 	"github.com/MonteCarloClub/KBD/kbpool"
 	"github.com/MonteCarloClub/KBD/kdb"
 	"github.com/MonteCarloClub/KBD/state"
 	"github.com/MonteCarloClub/KBD/vm"
+	"github.com/astaxie/beego/logs"
 )
 
 func RunStateTestWithReader(r io.Reader, skipTests []string) error {
@@ -54,7 +54,7 @@ func runStateTests(tests map[string]VmTest, skipTests []string) error {
 
 	for name, test := range tests {
 		if skipTest[name] {
-			glog.Infoln("Skipping state test", name)
+			logs.Info("Skipping state test %v", name)
 			return nil
 		}
 
@@ -62,7 +62,7 @@ func runStateTests(tests map[string]VmTest, skipTests []string) error {
 			return fmt.Errorf("%s: %s\n", name, err.Error())
 		}
 
-		glog.Infoln("State test passed: ", name)
+		logs.Info("State test passed: %v", name)
 		//fmt.Println(string(statedb.Dump()))
 	}
 	return nil
@@ -98,10 +98,9 @@ func runStateTest(test VmTest) error {
 		ret []byte
 		// gas  *big.Int
 		// err  error
-		logs state.Logs
 	)
 
-	ret, logs, _, _ = RunState(statedb, env, test.Transaction)
+	ret, _, _ = RunState(statedb, env, test.Transaction)
 
 	// // Compare expected  and actual return
 	rexp := common.FromHex(test.Out)
@@ -115,7 +114,7 @@ func runStateTest(test VmTest) error {
 		if obj == nil {
 			continue
 		}
-		fmt.Println(obj.Balance(), " \t", common.Big(account.Balance))
+		logs.Info(obj.Balance(), " \t", common.Big(account.Balance))
 		if obj.Balance().Cmp(common.Big(account.Balance)) != 0 {
 			return fmt.Errorf("(%x) balance failed. Expected %v, got %v => %v\n", obj.Address().Bytes()[:4], account.Balance, obj.Balance(), new(big.Int).Sub(common.Big(account.Balance), obj.Balance()))
 		}
@@ -139,17 +138,11 @@ func runStateTest(test VmTest) error {
 		return fmt.Errorf("Post state root error. Expected %s, got %x", test.PostStateRoot, statedb.Root())
 	}
 
-	// check logs
-	if len(test.Logs) > 0 {
-		if err := checkLogs(test.Logs, logs); err != nil {
-			return err
-		}
-	}
 	db.Close()
 	return nil
 }
 
-func RunState(statedb *state.StateDB, env, tx map[string]string) ([]byte, state.Logs, *big.Int, error) {
+func RunState(statedb *state.StateDB, env, tx map[string]string) ([]byte, *big.Int, error) {
 	var (
 		key   = crypto.ToECDSA(common.Hex2Bytes(tx["secretKey"]))
 		data  = common.FromHex(tx["data"])
@@ -181,5 +174,5 @@ func RunState(statedb *state.StateDB, env, tx map[string]string) ([]byte, state.
 	}
 	statedb.SyncObjects()
 
-	return ret, vmenv.state.Logs(), vmenv.Gas, err
+	return ret, vmenv.Gas, err
 }

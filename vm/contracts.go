@@ -1,11 +1,10 @@
 package vm
 
 import (
+	"github.com/astaxie/beego/logs"
 	"math/big"
 
 	"github.com/MonteCarloClub/KBD/common"
-	"github.com/MonteCarloClub/KBD/common/logger"
-	"github.com/MonteCarloClub/KBD/common/logger/glog"
 	"github.com/MonteCarloClub/KBD/crypto"
 	"github.com/MonteCarloClub/KBD/params"
 )
@@ -78,7 +77,7 @@ func ecrecoverFunc(in []byte) []byte {
 	v := byte(vbig.Uint64())
 
 	if !crypto.ValidateSignatureValues(v, r, s) {
-		glog.V(logger.Error).Infof("EC RECOVER FAIL: v, r or s value invalid")
+		logs.Error("EC RECOVER FAIL: v, r or s value invalid")
 		return nil
 	}
 
@@ -89,7 +88,7 @@ func ecrecoverFunc(in []byte) []byte {
 	pubKey, err := crypto.Ecrecover(in[:32], rsv)
 	// make sure the public key is a valid one
 	if err != nil {
-		glog.V(logger.Error).Infof("EC RECOVER FAIL: ", err)
+		logs.Error("EC RECOVER FAIL: %v", err)
 		return nil
 	}
 

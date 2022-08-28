@@ -3,11 +3,10 @@ package kbpool
 import (
 	"fmt"
 	"github.com/MonteCarloClub/KBD/block_error"
+	"github.com/astaxie/beego/logs"
 	"math/big"
 
 	"github.com/MonteCarloClub/KBD/common"
-	"github.com/MonteCarloClub/KBD/common/logger"
-	"github.com/MonteCarloClub/KBD/common/logger/glog"
 	"github.com/MonteCarloClub/KBD/params"
 	"github.com/MonteCarloClub/KBD/state"
 	"github.com/MonteCarloClub/KBD/vm"
@@ -205,7 +204,7 @@ func (self *StateTransition) transitionState() (ret []byte, usedGas *big.Int, er
 				ref.SetCode(ret)
 			} else {
 				ret = nil // does not affect consensus but useful for StateTests validations
-				glog.V(logger.Core).Infoln("Insufficient gas for creating code. Require", dataGas, "and have", self.gas)
+				logs.Info("Insufficient gas for creating code. Require", dataGas, "and have", self.gas)
 			}
 		}
 	} else {

@@ -4,10 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/MonteCarloClub/KBD/common"
-	"github.com/MonteCarloClub/KBD/common/logger"
-	"github.com/MonteCarloClub/KBD/common/logger/glog"
 	"github.com/MonteCarloClub/KBD/rlp"
 	"github.com/MonteCarloClub/KBD/types"
+	"github.com/astaxie/beego/logs"
 	"io/ioutil"
 	"net/http"
 )
@@ -41,15 +40,12 @@ func ReportBlock(block *types.Block, err error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		glog.V(logger.Error).Infoln("POST err:", err)
+		logs.Error("POST err:%v", err)
 		return
 	}
 	defer resp.Body.Close()
-
-	if glog.V(logger.Debug) {
-		glog.Infoln("response Status:", resp.Status)
-		glog.Infoln("response Headers:", resp.Header)
-		body, _ := ioutil.ReadAll(resp.Body)
-		glog.Infoln("response Body:", string(body))
-	}
+	logs.Debug("response Status:%v", resp.Status)
+	logs.Debug("response Headers:%v", resp.Header)
+	body, _ := ioutil.ReadAll(resp.Body)
+	logs.Debug("response Body:%v", string(body))
 }

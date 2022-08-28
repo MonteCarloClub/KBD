@@ -5,11 +5,10 @@ import (
 	"math/big"
 
 	"github.com/MonteCarloClub/KBD/common"
-	"github.com/MonteCarloClub/KBD/state"
 )
 
 type BlockProcessor interface {
-	Process(*Block) (state.Logs, Receipts, error)
+	Process(*Block) (Receipts, error)
 }
 
 const bloomLength = 256

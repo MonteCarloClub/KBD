@@ -6,11 +6,10 @@ import (
 	"math/big"
 
 	"github.com/MonteCarloClub/KBD/common"
-	"github.com/MonteCarloClub/KBD/common/logger"
-	"github.com/MonteCarloClub/KBD/common/logger/glog"
 	"github.com/MonteCarloClub/KBD/crypto"
 	"github.com/MonteCarloClub/KBD/rlp"
 	"github.com/MonteCarloClub/KBD/trie"
+	"github.com/astaxie/beego/logs"
 )
 
 type Code []byte
@@ -113,9 +112,7 @@ func (self *StateObject) MarkForDeletion() {
 	self.remove = true
 	self.dirty = true
 
-	if glog.V(logger.Core) {
-		glog.Infof("%x: #%d %v X\n", self.Address(), self.nonce, self.balance)
-	}
+	logs.Debug("%x: #%d %v X\n", self.Address(), self.nonce, self.balance)
 }
 
 func (c *StateObject) getAddr(addr common.Hash) common.Hash {
@@ -178,17 +175,13 @@ func (c *StateObject) GetInstr(pc *big.Int) *common.Value {
 func (c *StateObject) AddBalance(amount *big.Int) {
 	c.SetBalance(new(big.Int).Add(c.balance, amount))
 
-	if glog.V(logger.Core) {
-		glog.Infof("%x: #%d %v (+ %v)\n", c.Address(), c.nonce, c.balance, amount)
-	}
+	logs.Debug("%x: #%d %v (+ %v)\n", c.Address(), c.nonce, c.balance, amount)
 }
 
 func (c *StateObject) SubBalance(amount *big.Int) {
 	c.SetBalance(new(big.Int).Sub(c.balance, amount))
 
-	if glog.V(logger.Core) {
-		glog.Infof("%x: #%d %v (- %v)\n", c.Address(), c.nonce, c.balance, amount)
-	}
+	logs.Debug("%x: #%d %v (- %v)\n", c.Address(), c.nonce, c.balance, amount)
 }
 
 func (c *StateObject) SetBalance(amount *big.Int) {
@@ -210,9 +203,7 @@ func (c *StateObject) ReturnGas(gas, price *big.Int) {}
 func (self *StateObject) SetGasLimit(gasLimit *big.Int) {
 	self.gasPool = new(big.Int).Set(gasLimit)
 
-	if glog.V(logger.Core) {
-		glog.Infof("%x: gas (+ %v)", self.Address(), self.gasPool)
-	}
+	logs.Debug("%x: gas (+ %v)", self.Address(), self.gasPool)
 }
 
 func (self *StateObject) SubGas(gas, price *big.Int) error {

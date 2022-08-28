@@ -1,14 +1,13 @@
 package kdb
 
 import (
+	"github.com/astaxie/beego/logs"
 	"sync"
 	"time"
 
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
 
-	"github.com/MonteCarloClub/KBD/common/logger"
-	"github.com/MonteCarloClub/KBD/common/logger/glog"
 	"github.com/MonteCarloClub/KBD/compression/rle"
 )
 
@@ -111,7 +110,7 @@ func (self *LDBDatabase) Flush() error {
 func (self *LDBDatabase) Close() {
 	self.quit <- struct{}{}
 	<-self.quit
-	glog.V(logger.Info).Infoln("flushed and closed db:", self.fn)
+	logs.Info("flushed and closed db:%v", self.fn)
 }
 
 func (self *LDBDatabase) update() {
@@ -121,7 +120,7 @@ done:
 		select {
 		case <-ticker.C:
 			if err := self.Flush(); err != nil {
-				glog.V(logger.Error).Infof("error: flush '%s': %v\n", self.fn, err)
+				logs.Error("error: flush '%s': %v\n", self.fn, err)
 			}
 		case <-self.quit:
 			break done
@@ -129,7 +128,7 @@ done:
 	}
 
 	if err := self.Flush(); err != nil {
-		glog.V(logger.Error).Infof("error: flush '%s': %v\n", self.fn, err)
+		logs.Error("error: flush '%s': %v\n", self.fn, err)
 	}
 
 	// Close the leveldb database

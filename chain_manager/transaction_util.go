@@ -2,10 +2,9 @@ package chain_manager
 
 import (
 	"github.com/MonteCarloClub/KBD/common"
-	"github.com/MonteCarloClub/KBD/common/logger"
-	"github.com/MonteCarloClub/KBD/common/logger/glog"
 	"github.com/MonteCarloClub/KBD/rlp"
 	"github.com/MonteCarloClub/KBD/types"
+	"github.com/astaxie/beego/logs"
 )
 
 var receiptsPre = []byte("receipts-")
@@ -15,7 +14,7 @@ func PutTransactions(db common.Database, block *types.Block, txs types.Transacti
 	for i, tx := range block.Transactions() {
 		rlpEnc, err := rlp.EncodeToBytes(tx)
 		if err != nil {
-			glog.V(logger.Debug).Infoln("Failed encoding tx", err)
+			logs.Error("Failed encoding tx", err)
 			return
 		}
 		db.Put(tx.Hash().Bytes(), rlpEnc)
@@ -30,7 +29,7 @@ func PutTransactions(db common.Database, block *types.Block, txs types.Transacti
 		txExtra.Index = uint64(i)
 		rlpMeta, err := rlp.EncodeToBytes(txExtra)
 		if err != nil {
-			glog.V(logger.Debug).Infoln("Failed encoding tx meta data", err)
+			logs.Error("Failed encoding tx meta data", err)
 			return
 		}
 		db.Put(append(tx.Hash().Bytes(), 0x0001), rlpMeta)
@@ -64,7 +63,7 @@ func GetReceipt(db common.Database, txHash common.Hash) *types.Receipt {
 	var receipt types.Receipt
 	err := rlp.DecodeBytes(data, &receipt)
 	if err != nil {
-		glog.V(logger.Error).Infoln("GetReceipt err:", err)
+		logs.Error("GetReceipt err:", err)
 	}
 	return &receipt
 }

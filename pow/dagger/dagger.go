@@ -1,17 +1,15 @@
 package dagger
 
 import (
+	"github.com/astaxie/beego/logs"
 	"hash"
 	"math/big"
 	"math/rand"
 	"time"
 
 	"github.com/MonteCarloClub/KBD/common"
-	"github.com/MonteCarloClub/KBD/common/logger"
 	"github.com/MonteCarloClub/KBD/crypto/sha3"
 )
-
-var powlogger = logger.NewLogger("POW")
 
 type Dagger struct {
 	hash *big.Int
@@ -27,7 +25,7 @@ func (dag *Dagger) Find(obj *big.Int, resChan chan int64) {
 		rnd := r.Int63()
 
 		res := dag.Eval(big.NewInt(rnd))
-		powlogger.Infof("rnd %v\nres %v\nobj %v\n", rnd, res, obj)
+		logs.Debug("[POW]rnd %v\nres %v\nobj %v\n", rnd, res, obj)
 		if res.Cmp(obj) < 0 {
 			// Post back result on the channel
 			resChan <- rnd

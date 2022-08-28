@@ -2,13 +2,13 @@ package chain_manager
 
 import (
 	"bytes"
+	"math/big"
+
 	"github.com/MonteCarloClub/KBD/common"
-	"github.com/MonteCarloClub/KBD/common/logger"
-	"github.com/MonteCarloClub/KBD/common/logger/glog"
 	"github.com/MonteCarloClub/KBD/params"
 	"github.com/MonteCarloClub/KBD/rlp"
 	"github.com/MonteCarloClub/KBD/types"
-	"math/big"
+	"github.com/astaxie/beego/logs"
 )
 
 // CalcDifficulty is the difficulty adjustment algorithm. It returns
@@ -66,7 +66,7 @@ func GetBlockByHash(db common.Database, hash common.Hash) *types.Block {
 	}
 	var block types.StorageBlock
 	if err := rlp.Decode(bytes.NewReader(data), &block); err != nil {
-		glog.V(logger.Error).Infof("invalid block RLP for hash %x: %v", hash, err)
+		logs.Error("invalid block RLP for hash %x: %v", hash, err)
 		return nil
 	}
 	return (*types.Block)(&block)

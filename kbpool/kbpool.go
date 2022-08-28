@@ -8,13 +8,12 @@ package kbpool
 import (
 	"errors"
 	"fmt"
+	"github.com/astaxie/beego/logs"
 	"math/big"
 	"sort"
 	"sync"
 
 	"github.com/MonteCarloClub/KBD/common"
-	"github.com/MonteCarloClub/KBD/common/logger"
-	"github.com/MonteCarloClub/KBD/common/logger/glog"
 	"github.com/MonteCarloClub/KBD/event"
 	"github.com/MonteCarloClub/KBD/state"
 	"github.com/MonteCarloClub/KBD/types"
@@ -124,7 +123,7 @@ func (pool *TxPool) resetState() {
 func (pool *TxPool) Stop() {
 	close(pool.quit)
 	pool.events.Unsubscribe()
-	glog.V(logger.Info).Infoln("TX Pool stopped")
+	logs.Info("TX Pool stopped")
 }
 
 func (pool *TxPool) State() *state.ManagedState {
@@ -216,19 +215,17 @@ func (self *TxPool) add(tx *types.Transaction) error {
 	}
 	self.queueTx(hash, tx)
 
-	if glog.V(logger.Debug) {
-		var toname string
-		if to := tx.To(); to != nil {
-			toname = common.Bytes2Hex(to[:4])
-		} else {
-			toname = "[NEW_CONTRACT]"
-		}
-		// we can ignore the error here because From is
-		// verified in ValidateTransaction.
-		f, _ := tx.From()
-		from := common.Bytes2Hex(f[:4])
-		glog.Infof("(t) %x => %s (%v) %x\n", from, toname, tx.Value(), hash)
+	var toname string
+	if to := tx.To(); to != nil {
+		toname = common.Bytes2Hex(to[:4])
+	} else {
+		toname = "[NEW_CONTRACT]"
 	}
+	// we can ignore the error here because From is
+	// verified in ValidateTransaction.
+	f, _ := tx.From()
+	from := common.Bytes2Hex(f[:4])
+	logs.Info("(t) %x => %s (%v) %x\n", from, toname, tx.Value(), hash)
 
 	return nil
 }
@@ -278,10 +275,10 @@ func (self *TxPool) AddTransactions(txs []*types.Transaction) {
 
 	for _, tx := range txs {
 		if err := self.add(tx); err != nil {
-			glog.V(logger.Debug).Infoln("tx error:", err)
+			logs.Error("tx error:", err)
 		} else {
 			h := tx.Hash()
-			glog.V(logger.Debug).Infof("tx %x\n", h[:4])
+			logs.Info("tx %x\n", h[:4])
 		}
 	}
 
@@ -399,9 +396,7 @@ func (pool *TxPool) checkQueue() {
 
 			if e.Nonce() > guessedNonce {
 				if len(addq)-i > maxQueued {
-					if glog.V(logger.Debug) {
-						glog.Infof("Queued tx limit exceeded for %s. Tx %s removed\n", common.PP(address[:]), common.PP(e.hash[:]))
-					}
+					logs.Info("Queued tx limit exceeded for %s. Tx %s removed\n", common.PP(address[:]), common.PP(e.hash[:]))
 					for j := i + maxQueued; j < len(addq); j++ {
 						delete(txs, addq[j].hash)
 					}
@@ -425,9 +420,7 @@ func (pool *TxPool) validatePool() {
 		from, _ := tx.From() // err already checked
 		// perform light nonce validation
 		if state.GetNonce(from) > tx.Nonce() {
-			if glog.V(logger.Core) {
-				glog.Infof("removed tx (%x) from pool: low tx nonce\n", hash[:4])
-			}
+			logs.Info("removed tx (%x) from pool: low tx nonce\n", hash[:4])
 			delete(pool.pending, hash)
 		}
 	}

@@ -7,12 +7,9 @@ import (
 	"time"
 
 	"github.com/MonteCarloClub/KBD/common"
-	"github.com/MonteCarloClub/KBD/common/logger"
 	"github.com/MonteCarloClub/KBD/crypto/sha3"
 	"github.com/MonteCarloClub/KBD/pow"
 )
-
-var powlogger = logger.NewLogger("POW")
 
 type EasyPow struct {
 	hash     *big.Int

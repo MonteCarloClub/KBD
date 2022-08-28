@@ -2,7 +2,6 @@ package chain_manager
 
 import (
 	"github.com/MonteCarloClub/KBD/common"
-	"github.com/MonteCarloClub/KBD/state"
 	"github.com/MonteCarloClub/KBD/types"
 	"math/big"
 )
@@ -22,23 +21,19 @@ type NewMinedBlockEvent struct{ Block *types.Block }
 // ChainSplit is posted when a new head is detected
 type ChainSplitEvent struct {
 	Block *types.Block
-	Logs  state.Logs
 }
 
 type ChainEvent struct {
 	Block *types.Block
 	Hash  common.Hash
-	Logs  state.Logs
 }
 
 type ChainSideEvent struct {
 	Block *types.Block
-	Logs  state.Logs
 }
 
 type PendingBlockEvent struct {
 	Block *types.Block
-	Logs  state.Logs
 }
 
 type ChainUncleEvent struct {

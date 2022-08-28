@@ -7,8 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/MonteCarloClub/KBD/common/logger"
-	"github.com/MonteCarloClub/KBD/common/logger/glog"
+	"github.com/astaxie/beego/logs"
 	"github.com/rcrowley/go-metrics"
 )
 
@@ -24,7 +23,7 @@ var enabled = false
 func init() {
 	for _, arg := range os.Args {
 		if strings.TrimLeft(arg, "-") == MetricsEnabledFlag {
-			glog.V(logger.Info).Infof("Enabling metrics collection")
+			logs.Info("Enabling metrics collection")
 			enabled = true
 		}
 	}
@@ -75,7 +74,7 @@ func CollectProcessMetrics(refresh time.Duration) {
 		diskWrites = metrics.GetOrRegisterMeter("system/disk/writecount", metrics.DefaultRegistry)
 		diskWriteBytes = metrics.GetOrRegisterMeter("system/disk/writedata", metrics.DefaultRegistry)
 	} else {
-		glog.V(logger.Debug).Infof("failed to read disk metrics: %v", err)
+		logs.Error("failed to read disk metrics: %v", err)
 	}
 	// Iterate loading the different stats and updating the meters
 	for i := 1; ; i++ {
