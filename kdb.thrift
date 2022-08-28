@@ -6,6 +6,23 @@ struct Account {
     3: required i64 nonce
 }
 
+struct GetDataRequest{
+    1: required string key
+}
+
+struct GetDataResponse{
+    1: required string value
+}
+
+struct PutDataRequest{
+    1: required string key
+    2: required string value
+}
+
+struct PutDataResponse{
+    1: required bool success
+}
+
 struct GetAccountDataRequest {
     1: required string address
 }
@@ -16,5 +33,7 @@ struct GetAccountDataResponse {
 }
 
 service kanBanDatabase {
+    GetDataResponse GetData(1: GetDataRequest req)
+    PutDataResponse PutData(1: PutDataRequest req)
     GetAccountDataResponse GetAccountData(1:  GetAccountDataRequest req)
 }

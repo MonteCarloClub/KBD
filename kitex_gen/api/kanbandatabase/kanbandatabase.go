@@ -19,6 +19,8 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	serviceName := "kanBanDatabase"
 	handlerType := (*api.KanBanDatabase)(nil)
 	methods := map[string]kitex.MethodInfo{
+		"GetData":        kitex.NewMethodInfo(getDataHandler, newKanBanDatabaseGetDataArgs, newKanBanDatabaseGetDataResult, false),
+		"PutData":        kitex.NewMethodInfo(putDataHandler, newKanBanDatabasePutDataArgs, newKanBanDatabasePutDataResult, false),
 		"GetAccountData": kitex.NewMethodInfo(getAccountDataHandler, newKanBanDatabaseGetAccountDataArgs, newKanBanDatabaseGetAccountDataResult, false),
 	}
 	extra := map[string]interface{}{
@@ -33,6 +35,42 @@ func NewServiceInfo() *kitex.ServiceInfo {
 		Extra:           extra,
 	}
 	return svcInfo
+}
+
+func getDataHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*api.KanBanDatabaseGetDataArgs)
+	realResult := result.(*api.KanBanDatabaseGetDataResult)
+	success, err := handler.(api.KanBanDatabase).GetData(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newKanBanDatabaseGetDataArgs() interface{} {
+	return api.NewKanBanDatabaseGetDataArgs()
+}
+
+func newKanBanDatabaseGetDataResult() interface{} {
+	return api.NewKanBanDatabaseGetDataResult()
+}
+
+func putDataHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*api.KanBanDatabasePutDataArgs)
+	realResult := result.(*api.KanBanDatabasePutDataResult)
+	success, err := handler.(api.KanBanDatabase).PutData(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newKanBanDatabasePutDataArgs() interface{} {
+	return api.NewKanBanDatabasePutDataArgs()
+}
+
+func newKanBanDatabasePutDataResult() interface{} {
+	return api.NewKanBanDatabasePutDataResult()
 }
 
 func getAccountDataHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
@@ -61,6 +99,26 @@ func newServiceClient(c client.Client) *kClient {
 	return &kClient{
 		c: c,
 	}
+}
+
+func (p *kClient) GetData(ctx context.Context, req *api.GetDataRequest) (r *api.GetDataResponse, err error) {
+	var _args api.KanBanDatabaseGetDataArgs
+	_args.Req = req
+	var _result api.KanBanDatabaseGetDataResult
+	if err = p.c.Call(ctx, "GetData", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) PutData(ctx context.Context, req *api.PutDataRequest) (r *api.PutDataResponse, err error) {
+	var _args api.KanBanDatabasePutDataArgs
+	_args.Req = req
+	var _result api.KanBanDatabasePutDataResult
+	if err = p.c.Call(ctx, "PutData", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
 }
 
 func (p *kClient) GetAccountData(ctx context.Context, req *api.GetAccountDataRequest) (r *api.GetAccountDataResponse, err error) {

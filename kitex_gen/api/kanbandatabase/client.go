@@ -11,6 +11,8 @@ import (
 
 // Client is designed to provide IDL-compatible methods with call-option parameter for kitex framework.
 type Client interface {
+	GetData(ctx context.Context, req *api.GetDataRequest, callOptions ...callopt.Option) (r *api.GetDataResponse, err error)
+	PutData(ctx context.Context, req *api.PutDataRequest, callOptions ...callopt.Option) (r *api.PutDataResponse, err error)
 	GetAccountData(ctx context.Context, req *api.GetAccountDataRequest, callOptions ...callopt.Option) (r *api.GetAccountDataResponse, err error)
 }
 
@@ -41,6 +43,16 @@ func MustNewClient(destService string, opts ...client.Option) Client {
 
 type kKanBanDatabaseClient struct {
 	*kClient
+}
+
+func (p *kKanBanDatabaseClient) GetData(ctx context.Context, req *api.GetDataRequest, callOptions ...callopt.Option) (r *api.GetDataResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.GetData(ctx, req)
+}
+
+func (p *kKanBanDatabaseClient) PutData(ctx context.Context, req *api.PutDataRequest, callOptions ...callopt.Option) (r *api.PutDataResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.PutData(ctx, req)
 }
 
 func (p *kKanBanDatabaseClient) GetAccountData(ctx context.Context, req *api.GetAccountDataRequest, callOptions ...callopt.Option) (r *api.GetAccountDataResponse, err error) {
