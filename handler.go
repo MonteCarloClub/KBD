@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-
 	"github.com/MonteCarloClub/KBD/handler"
 	"github.com/MonteCarloClub/KBD/kitex_gen/api"
 )
