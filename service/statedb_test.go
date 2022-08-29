@@ -10,7 +10,7 @@ import (
 
 func TestPutAccountData(t *testing.T) {
 	stateDB := frame.GetStateDB()
-	address := common.StringToAddress("0x945304eb96065b2a98b57a48a06ae28d285a71b5")
+	address := common.HexToAddress("0x945304eb96065b2a98b57a48a06ae28d285a71b5")
 	balance := "0x17"
 	code := "0x6000355415600957005b60203560003555"
 	nonce := "0x00"
@@ -23,7 +23,7 @@ func TestPutAccountData(t *testing.T) {
 
 func TestGetAccountData(t *testing.T) {
 	stateDB := frame.GetStateDB()
-	address := common.StringToAddress("0x945304eb96065b2a98b57a48a06ae28d285a71b5")
+	address := common.HexToAddress("0x945304eb96065b2a98b57a48a06ae28d285a71b5")
 	res := stateDB.GetStateObject(address)
 	fmt.Println(res)
 }

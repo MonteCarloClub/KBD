@@ -13,8 +13,9 @@ import (
 
 func SetAccountData(ctx context.Context, req *api.SetAccountDataRequest) bool {
 	stateDB := frame.GetStateDB()
-	address := common.StringToAddress(req.Address)
+	address := common.HexToAddress(req.Address)
 	obj := StateObjectFromAccount(frame.GetDB(), address, req.GetBalance(), req.GetCode(), req.GetNonce())
+	stateDB.Trie().Commit()
 	stateDB.UpdateStateObject(obj)
 	return true
 }
