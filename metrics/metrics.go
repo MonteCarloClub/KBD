@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/astaxie/beego/logs"
 	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/rcrowley/go-metrics"
 )
@@ -75,7 +74,7 @@ func CollectProcessMetrics(refresh time.Duration) {
 		diskWrites = metrics.GetOrRegisterMeter("system/disk/writecount", metrics.DefaultRegistry)
 		diskWriteBytes = metrics.GetOrRegisterMeter("system/disk/writedata", metrics.DefaultRegistry)
 	} else {
-		logs.Error("failed to read disk metrics: %v", err)
+		klog.Error("failed to read disk metrics: %v", err)
 	}
 	// Iterate loading the different stats and updating the meters
 	for i := 1; ; i++ {

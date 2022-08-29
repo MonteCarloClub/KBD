@@ -1,12 +1,12 @@
 package vm
 
 import (
-	"github.com/astaxie/beego/logs"
 	"math/big"
 
 	"github.com/MonteCarloClub/KBD/common"
 	"github.com/MonteCarloClub/KBD/crypto"
 	"github.com/MonteCarloClub/KBD/params"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type Address interface {
@@ -77,7 +77,7 @@ func ecrecoverFunc(in []byte) []byte {
 	v := byte(vbig.Uint64())
 
 	if !crypto.ValidateSignatureValues(v, r, s) {
-		logs.Error("EC RECOVER FAIL: v, r or s value invalid")
+		klog.Error("EC RECOVER FAIL: v, r or s value invalid")
 		return nil
 	}
 
@@ -88,7 +88,7 @@ func ecrecoverFunc(in []byte) []byte {
 	pubKey, err := crypto.Ecrecover(in[:32], rsv)
 	// make sure the public key is a valid one
 	if err != nil {
-		logs.Error("EC RECOVER FAIL: %v", err)
+		klog.Error("EC RECOVER FAIL: %v", err)
 		return nil
 	}
 

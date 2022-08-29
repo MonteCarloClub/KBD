@@ -8,7 +8,7 @@ import (
 	"github.com/MonteCarloClub/KBD/params"
 	"github.com/MonteCarloClub/KBD/rlp"
 	"github.com/MonteCarloClub/KBD/types"
-	"github.com/astaxie/beego/logs"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 // CalcDifficulty is the difficulty adjustment algorithm. It returns
@@ -66,7 +66,7 @@ func GetBlockByHash(db common.Database, hash common.Hash) *types.Block {
 	}
 	var block types.StorageBlock
 	if err := rlp.Decode(bytes.NewReader(data), &block); err != nil {
-		logs.Error("invalid block RLP for hash %x: %v", hash, err)
+		klog.Error("invalid block RLP for hash %x: %v", hash, err)
 		return nil
 	}
 	return (*types.Block)(&block)

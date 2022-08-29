@@ -4,7 +4,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/astaxie/beego/logs"
 	"github.com/cloudwego/kitex/pkg/klog"
 
 	"github.com/syndtr/goleveldb/leveldb"
@@ -122,7 +121,7 @@ done:
 		select {
 		case <-ticker.C:
 			if err := self.Flush(); err != nil {
-				logs.Error("error: flush '%s': %v\n", self.fn, err)
+				klog.Error("error: flush '%s': %v\n", self.fn, err)
 			}
 		case <-self.quit:
 			break done
@@ -130,7 +129,7 @@ done:
 	}
 
 	if err := self.Flush(); err != nil {
-		logs.Error("error: flush '%s': %v\n", self.fn, err)
+		klog.Error("error: flush '%s': %v\n", self.fn, err)
 	}
 
 	// Close the leveldb database

@@ -95,11 +95,11 @@ func NewChainManager(genesis *types.Block, blockDb, stateDb, extraDb common.Data
 			klog.Infof("Found bad hash. Reorganising chain to state %x\n", block.ParentHash().Bytes()[:4])
 			block = bc.GetBlock(block.ParentHash())
 			if block == nil {
-				logs.Error("Unable to complete. Parent block not found. Corrupted DB?")
+				klog.Error("Unable to complete. Parent block not found. Corrupted DB?")
 			}
 			bc.SetHead(block)
 
-			logs.Error("Chain reorg was successfull. Resuming normal operation")
+			klog.Error("Chain reorg was successfull. Resuming normal operation")
 		}
 	}
 
@@ -196,7 +196,7 @@ func (bc *ChainManager) recover() bool {
 		if block != nil {
 			err := bc.blockDb.Put([]byte("LastBlock"), block.Hash().Bytes())
 			if err != nil {
-				logs.Error("db write err:%v", err)
+				klog.Error("db write err:%v", err)
 			}
 
 			bc.currentBlock = block
@@ -318,14 +318,14 @@ func (self *ChainManager) ExportN(w io.Writer, first uint64, last uint64) error 
 func (bc *ChainManager) insert(block *types.Block) {
 	err := WriteHead(bc.blockDb, block)
 	if err != nil {
-		logs.Error("db write fail:%v", err)
+		klog.Error("db write fail:%v", err)
 	}
 
 	bc.checkpoint++
 	if bc.checkpoint > checkpointLimit {
 		err = bc.blockDb.Put([]byte("checkpoint"), block.Hash().Bytes())
 		if err != nil {
-			logs.Error("db write fail:%v", err)
+			klog.Error("db write fail:%v", err)
 		}
 
 		bc.checkpoint = 0
@@ -342,7 +342,7 @@ func (bc *ChainManager) write(block *types.Block) {
 	key := append(blockHashPre, block.Hash().Bytes()...)
 	err := bc.blockDb.Put(key, enc)
 	if err != nil {
-		logs.Error("db write fail:%v", err)
+		klog.Error("db write fail:%v", err)
 	}
 	logs.Debug("wrote block #%v %s. Took %v\n", block.Number(), common.PP(block.Hash().Bytes()), time.Since(tstart))
 }
@@ -748,7 +748,7 @@ out:
 
 func blockErr(block *types.Block, err error) {
 	h := block.Header()
-	logs.Error("Bad block #%v (%x)\n err:%v", h.Number, h.Hash().Bytes(), err)
+	klog.Error("Bad block #%v (%x)\n err:%v", h.Number, h.Hash().Bytes(), err)
 	logs.Debug("%v", verifyNonces)
 }
 

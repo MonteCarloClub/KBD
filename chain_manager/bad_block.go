@@ -3,12 +3,14 @@ package chain_manager
 import (
 	"bytes"
 	"encoding/json"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/MonteCarloClub/KBD/common"
 	"github.com/MonteCarloClub/KBD/rlp"
 	"github.com/MonteCarloClub/KBD/types"
 	"github.com/astaxie/beego/logs"
-	"io/ioutil"
-	"net/http"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 // DisabledBadBlockReporting can be set to prevent blocks being reported.
@@ -40,7 +42,7 @@ func ReportBlock(block *types.Block, err error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		logs.Error("POST err:%v", err)
+		klog.Error("POST err:%v", err)
 		return
 	}
 	defer resp.Body.Close()

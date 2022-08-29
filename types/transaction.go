@@ -11,7 +11,7 @@ import (
 	"github.com/MonteCarloClub/KBD/common"
 	"github.com/MonteCarloClub/KBD/crypto"
 	"github.com/MonteCarloClub/KBD/rlp"
-	"github.com/astaxie/beego/logs"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 func IsContractAddr(addr []byte) bool {
@@ -190,7 +190,7 @@ func (tx *Transaction) publicKey() ([]byte, error) {
 	hash := tx.SigHash()
 	pub, err := crypto.Ecrecover(hash[:], sig)
 	if err != nil {
-		logs.Error("Could not get pubkey from signature: %v", err)
+		klog.Error("Could not get pubkey from signature: %v", err)
 		return nil, err
 	}
 	if len(pub) == 0 || pub[0] != 4 {

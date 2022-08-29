@@ -1,11 +1,11 @@
 package vm
 
 import (
-	"github.com/astaxie/beego/logs"
 	"math"
 	"math/big"
 
 	"github.com/MonteCarloClub/KBD/common"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 // Global Debug flag indicating Debug VM (full logging)
@@ -39,7 +39,7 @@ func NewVm(env Environment) VirtualMachine {
 	case JitVmTy:
 		return NewJitVm(env)
 	default:
-		logs.Error("unsupported vm type %d", env.VmType())
+		klog.Error("unsupported vm type %d", env.VmType())
 		fallthrough
 	case StdVmTy:
 		return New(env)

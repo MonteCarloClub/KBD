@@ -3,7 +3,7 @@ package trie
 import (
 	"github.com/MonteCarloClub/KBD/compression/rle"
 	"github.com/MonteCarloClub/KBD/kdb"
-	"github.com/astaxie/beego/logs"
+	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
@@ -42,7 +42,7 @@ func (self *Cache) Put(key []byte, data []byte) {
 func (self *Cache) Flush() {
 	if db, ok := self.backend.(*kdb.LDBDatabase); ok {
 		if err := db.LDB().Write(self.batch, nil); err != nil {
-			logs.Error("db write err:%v", err)
+			klog.Error("db write err:%v", err)
 		}
 	} else {
 		for k, v := range self.store {

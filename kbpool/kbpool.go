@@ -12,7 +12,6 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/astaxie/beego/logs"
 	"github.com/cloudwego/kitex/pkg/klog"
 
 	"github.com/MonteCarloClub/KBD/common"
@@ -277,7 +276,7 @@ func (self *TxPool) AddTransactions(txs []*types.Transaction) {
 
 	for _, tx := range txs {
 		if err := self.add(tx); err != nil {
-			logs.Error("tx error:", err)
+			klog.Error("tx error:", err)
 		} else {
 			h := tx.Hash()
 			klog.Infof("tx %x\n", h[:4])
