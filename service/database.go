@@ -4,8 +4,9 @@ import (
 	"context"
 	"path"
 
+	"github.com/MonteCarloClub/KBD/model/kdb"
+
 	"github.com/MonteCarloClub/KBD/constant"
-	"github.com/MonteCarloClub/KBD/kdb"
 	"github.com/MonteCarloClub/KBD/kitex_gen/api"
 )
 

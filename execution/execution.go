@@ -3,37 +3,38 @@ package execution
 import (
 	"math/big"
 
+	"github.com/MonteCarloClub/KBD/model/state"
+	vm2 "github.com/MonteCarloClub/KBD/model/vm"
+
 	. "github.com/MonteCarloClub/KBD/block_error"
 	"github.com/MonteCarloClub/KBD/common"
 	"github.com/MonteCarloClub/KBD/crypto"
 	"github.com/MonteCarloClub/KBD/params"
-	"github.com/MonteCarloClub/KBD/state"
-	"github.com/MonteCarloClub/KBD/vm"
 )
 
 type Execution struct {
-	env     vm.Environment
+	env     vm2.Environment
 	address *common.Address
 	input   []byte
-	evm     vm.VirtualMachine
+	evm     vm2.VirtualMachine
 
 	Gas, price, value *big.Int
 }
 
-func NewExecution(env vm.Environment, address *common.Address, input []byte, gas, gasPrice, value *big.Int) *Execution {
+func NewExecution(env vm2.Environment, address *common.Address, input []byte, gas, gasPrice, value *big.Int) *Execution {
 	exe := &Execution{env: env, address: address, input: input, Gas: gas, price: gasPrice, value: value}
-	exe.evm = vm.NewVm(env)
+	exe.evm = vm2.NewVm(env)
 	return exe
 }
 
-func (self *Execution) Call(codeAddr common.Address, caller vm.ContextRef) ([]byte, error) {
+func (self *Execution) Call(codeAddr common.Address, caller vm2.ContextRef) ([]byte, error) {
 	// Retrieve the executing code
 	code := self.env.State().GetCode(codeAddr)
 
 	return self.exec(&codeAddr, code, caller)
 }
 
-func (self *Execution) Create(caller vm.ContextRef) (ret []byte, err error, account *state.StateObject) {
+func (self *Execution) Create(caller vm2.ContextRef) (ret []byte, err error, account *state.StateObject) {
 	// Input must be nil for create
 	code := self.input
 	self.input = nil
@@ -48,13 +49,13 @@ func (self *Execution) Create(caller vm.ContextRef) (ret []byte, err error, acco
 	return
 }
 
-func (self *Execution) exec(contextAddr *common.Address, code []byte, caller vm.ContextRef) (ret []byte, err error) {
+func (self *Execution) exec(contextAddr *common.Address, code []byte, caller vm2.ContextRef) (ret []byte, err error) {
 	env := self.env
 	evm := self.evm
 	if env.Depth() > int(params.CallCreateDepth.Int64()) {
 		caller.ReturnGas(self.Gas, self.price)
 
-		return nil, vm.DepthError
+		return nil, vm2.DepthError
 	}
 
 	vsnapshot := env.State().Copy()
@@ -90,7 +91,7 @@ func (self *Execution) exec(contextAddr *common.Address, code []byte, caller vm.
 		return nil, ValueTransferErr("insufficient funds to transfer value. Req %v, has %v", self.value, from.Balance())
 	}
 
-	context := vm.NewContext(caller, to, self.value, self.Gas, self.price)
+	context := vm2.NewContext(caller, to, self.value, self.Gas, self.price)
 	context.SetCallCode(contextAddr, code)
 
 	ret, err = evm.Run(context, self.input)

@@ -3,12 +3,13 @@ package chain_manager
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/MonteCarloClub/KBD/common"
-	"github.com/MonteCarloClub/KBD/params"
-	"github.com/MonteCarloClub/KBD/state"
-	"github.com/MonteCarloClub/KBD/types"
 	"math/big"
 	"os"
+
+	"github.com/MonteCarloClub/KBD/common"
+	"github.com/MonteCarloClub/KBD/model/state"
+	"github.com/MonteCarloClub/KBD/params"
+	"github.com/MonteCarloClub/KBD/types"
 )
 
 // GenesisBlock creates a genesis block with the given nonce.

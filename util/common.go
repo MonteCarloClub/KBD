@@ -6,15 +6,16 @@ import (
 	"fmt"
 	"math/big"
 
+	state2 "github.com/MonteCarloClub/KBD/model/state"
+	vm2 "github.com/MonteCarloClub/KBD/model/vm"
+
 	"github.com/MonteCarloClub/KBD/common"
 	"github.com/MonteCarloClub/KBD/crypto"
 	"github.com/MonteCarloClub/KBD/execution"
-	"github.com/MonteCarloClub/KBD/state"
 	"github.com/MonteCarloClub/KBD/types"
-	"github.com/MonteCarloClub/KBD/vm"
 )
 
-func CheckLogs(tlog []Log, logs state.Logs) error {
+func CheckLogs(tlog []Log, logs state2.Logs) error {
 
 	if len(tlog) != len(logs) {
 		return fmt.Errorf("log length mismatch. Expected %d, got %d", len(tlog), len(logs))
@@ -37,7 +38,7 @@ func CheckLogs(tlog []Log, logs state.Logs) error {
 					}
 				}
 			}
-			genBloom := common.LeftPadBytes(types.LogsBloom(state.Logs{logs[i]}).Bytes(), 256)
+			genBloom := common.LeftPadBytes(types.LogsBloom(state2.Logs{logs[i]}).Bytes(), 256)
 
 			if !bytes.Equal(genBloom, common.Hex2Bytes(log.BloomF)) {
 				return fmt.Errorf("bloom mismatch")
@@ -72,8 +73,8 @@ func (self Log) Topics() [][]byte {
 	return t
 }
 
-func StateObjectFromAccount(db common.Database, addr string, account Account) *state.StateObject {
-	obj := state.NewStateObject(common.HexToAddress(addr), db)
+func StateObjectFromAccount(db common.Database, addr string, account Account) *state2.StateObject {
+	obj := state2.NewStateObject(common.HexToAddress(addr), db)
 	obj.SetBalance(common.Big(account.Balance))
 
 	if common.IsHex(account.Code) {
@@ -110,7 +111,7 @@ type VmTest struct {
 
 type Env struct {
 	depth        int
-	state        *state.StateDB
+	state        *state2.StateDB
 	skipTransfer bool
 	initial      bool
 	Gas          *big.Int
@@ -124,26 +125,26 @@ type Env struct {
 	difficulty *big.Int
 	gasLimit   *big.Int
 
-	logs []vm.StructLog
+	logs []vm2.StructLog
 
 	vmTest bool
 }
 
-func NewEnv(state *state.StateDB) *Env {
+func NewEnv(state *state2.StateDB) *Env {
 	return &Env{
 		state: state,
 	}
 }
 
-func (self *Env) StructLogs() []vm.StructLog {
+func (self *Env) StructLogs() []vm2.StructLog {
 	return self.logs
 }
 
-func (self *Env) AddStructLog(log vm.StructLog) {
+func (self *Env) AddStructLog(log vm2.StructLog) {
 	self.logs = append(self.logs, log)
 }
 
-func NewEnvFromMap(state *state.StateDB, envValues map[string]string, exeValues map[string]string) *Env {
+func NewEnvFromMap(state *state2.StateDB, envValues map[string]string, exeValues map[string]string) *Env {
 	env := NewEnv(state)
 
 	env.origin = common.HexToAddress(exeValues["caller"])
@@ -165,18 +166,18 @@ func (self *Env) BlockNumber() *big.Int  { return self.number }
 func (self *Env) Coinbase() common.Address { return self.coinbase }
 func (self *Env) Time() uint64             { return self.time }
 func (self *Env) Difficulty() *big.Int     { return self.difficulty }
-func (self *Env) State() *state.StateDB    { return self.state }
+func (self *Env) State() *state2.StateDB   { return self.state }
 func (self *Env) GasLimit() *big.Int       { return self.gasLimit }
-func (self *Env) VmType() vm.Type          { return vm.StdVmTy }
+func (self *Env) VmType() vm2.Type         { return vm2.StdVmTy }
 func (self *Env) GetHash(n uint64) common.Hash {
 	return common.BytesToHash(crypto.Sha3([]byte(big.NewInt(int64(n)).String())))
 }
-func (self *Env) AddLog(log *state.Log) {
+func (self *Env) AddLog(log *state2.Log) {
 	self.state.AddLog(log)
 }
 func (self *Env) Depth() int     { return self.depth }
 func (self *Env) SetDepth(i int) { self.depth = i }
-func (self *Env) Transfer(from, to vm.Account, amount *big.Int) error {
+func (self *Env) Transfer(from, to vm2.Account, amount *big.Int) error {
 	if self.skipTransfer {
 		// ugly hack
 		if self.initial {
@@ -190,7 +191,7 @@ func (self *Env) Transfer(from, to vm.Account, amount *big.Int) error {
 
 		return nil
 	}
-	return vm.Transfer(from, to, amount)
+	return vm2.Transfer(from, to, amount)
 }
 
 func (self *Env) vm(addr *common.Address, data []byte, gas, price, value *big.Int) *execution.Execution {
@@ -199,7 +200,7 @@ func (self *Env) vm(addr *common.Address, data []byte, gas, price, value *big.In
 	return exec
 }
 
-func (self *Env) Call(caller vm.ContextRef, addr common.Address, data []byte, gas, price, value *big.Int) ([]byte, error) {
+func (self *Env) Call(caller vm2.ContextRef, addr common.Address, data []byte, gas, price, value *big.Int) ([]byte, error) {
 	if self.vmTest && self.depth > 0 {
 		caller.ReturnGas(gas, price)
 
@@ -212,7 +213,7 @@ func (self *Env) Call(caller vm.ContextRef, addr common.Address, data []byte, ga
 	return ret, err
 
 }
-func (self *Env) CallCode(caller vm.ContextRef, addr common.Address, data []byte, gas, price, value *big.Int) ([]byte, error) {
+func (self *Env) CallCode(caller vm2.ContextRef, addr common.Address, data []byte, gas, price, value *big.Int) ([]byte, error) {
 	if self.vmTest && self.depth > 0 {
 		caller.ReturnGas(gas, price)
 
@@ -224,7 +225,7 @@ func (self *Env) CallCode(caller vm.ContextRef, addr common.Address, data []byte
 	return exe.Call(addr, caller)
 }
 
-func (self *Env) Create(caller vm.ContextRef, data []byte, gas, price, value *big.Int) ([]byte, error, vm.ContextRef) {
+func (self *Env) Create(caller vm2.ContextRef, data []byte, gas, price, value *big.Int) ([]byte, error, vm2.ContextRef) {
 	exe := self.vm(nil, data, gas, price, value)
 	if self.vmTest {
 		caller.ReturnGas(gas, price)

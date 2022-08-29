@@ -9,13 +9,14 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/MonteCarloClub/KBD/model/event"
+	"github.com/MonteCarloClub/KBD/model/pow"
+	state2 "github.com/MonteCarloClub/KBD/model/state"
+
 	. "github.com/MonteCarloClub/KBD/block_error"
 	"github.com/MonteCarloClub/KBD/common"
-	"github.com/MonteCarloClub/KBD/event"
 	"github.com/MonteCarloClub/KBD/metrics"
-	"github.com/MonteCarloClub/KBD/pow"
 	"github.com/MonteCarloClub/KBD/rlp"
-	"github.com/MonteCarloClub/KBD/state"
 	"github.com/MonteCarloClub/KBD/types"
 	"github.com/astaxie/beego/logs"
 	"github.com/cloudwego/kitex/pkg/klog"
@@ -55,8 +56,8 @@ type ChainManager struct {
 	lastBlockHash   common.Hash
 	currentGasLimit *big.Int
 
-	transState *state.StateDB
-	txState    *state.ManagedState
+	transState *state2.StateDB
+	txState    *state2.ManagedState
 
 	cache        *lru.Cache // cache is the LRU caching
 	futureBlocks *lru.Cache // future blocks are blocks added for later processing
@@ -105,7 +106,7 @@ func NewChainManager(genesis *types.Block, blockDb, stateDb, extraDb common.Data
 
 	bc.transState = bc.State().Copy()
 	// Take ownership of this particular state
-	bc.txState = state.ManageState(bc.State().Copy())
+	bc.txState = state2.ManageState(bc.State().Copy())
 
 	bc.futureBlocks, _ = lru.New(maxFutureBlocks)
 	bc.makeCache()
@@ -127,8 +128,8 @@ func (bc *ChainManager) SetHead(head *types.Block) {
 	bc.currentBlock = head
 	bc.makeCache()
 
-	statedb := state.New(head.Root(), bc.stateDb)
-	bc.txState = state.ManageState(statedb)
+	statedb := state2.New(head.Root(), bc.stateDb)
+	bc.txState = state2.ManageState(statedb)
 	bc.transState = statedb.Copy()
 	bc.setTotalDifficulty(head.Td)
 	bc.insert(head)
@@ -174,18 +175,18 @@ func (self *ChainManager) SetProcessor(proc types.BlockProcessor) {
 	self.processor = proc
 }
 
-func (self *ChainManager) State() *state.StateDB {
-	return state.New(self.CurrentBlock().Root(), self.stateDb)
+func (self *ChainManager) State() *state2.StateDB {
+	return state2.New(self.CurrentBlock().Root(), self.stateDb)
 }
 
-func (self *ChainManager) TransState() *state.StateDB {
+func (self *ChainManager) TransState() *state2.StateDB {
 	self.tsmu.RLock()
 	defer self.tsmu.RUnlock()
 
 	return self.transState
 }
 
-func (self *ChainManager) setTransState(statedb *state.StateDB) {
+func (self *ChainManager) setTransState(statedb *state2.StateDB) {
 	self.transState = statedb
 }
 
@@ -502,8 +503,8 @@ func (self *ChainManager) WriteBlock(block *types.Block, queued bool) (status wr
 		self.insert(block)
 		self.mu.Unlock()
 
-		self.setTransState(state.New(block.Root(), self.stateDb))
-		self.txState.SetState(state.New(block.Root(), self.stateDb))
+		self.setTransState(state2.New(block.Root(), self.stateDb))
+		self.txState.SetState(state2.New(block.Root(), self.stateDb))
 
 		status = CanonStatTy
 	} else {

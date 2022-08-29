@@ -8,14 +8,15 @@ import (
 	"path"
 	"strconv"
 
+	"github.com/MonteCarloClub/KBD/model/kbpool"
+	"github.com/MonteCarloClub/KBD/model/kdb"
+	state2 "github.com/MonteCarloClub/KBD/model/state"
+	"github.com/MonteCarloClub/KBD/model/vm"
+
 	"github.com/MonteCarloClub/KBD/block_error"
 	"github.com/MonteCarloClub/KBD/common"
 	"github.com/MonteCarloClub/KBD/constant"
 	"github.com/MonteCarloClub/KBD/crypto"
-	"github.com/MonteCarloClub/KBD/kbpool"
-	"github.com/MonteCarloClub/KBD/kdb"
-	"github.com/MonteCarloClub/KBD/state"
-	"github.com/MonteCarloClub/KBD/vm"
 	"github.com/cloudwego/kitex/pkg/klog"
 )
 
@@ -72,7 +73,7 @@ func runStateTests(tests map[string]VmTest, skipTests []string) error {
 func runStateTest(test VmTest) error {
 	file := path.Join("/", constant.DataDir, constant.StateDBFile)
 	db, _ := kdb.NewLDBDatabase(file)
-	statedb := state.New(common.Hash{}, db)
+	statedb := state2.New(common.Hash{}, db)
 	for addr, account := range test.Pre {
 		obj := StateObjectFromAccount(db, addr, account)
 		statedb.SetStateObject(obj)
@@ -142,7 +143,7 @@ func runStateTest(test VmTest) error {
 	return nil
 }
 
-func RunState(statedb *state.StateDB, env, tx map[string]string) ([]byte, *big.Int, error) {
+func RunState(statedb *state2.StateDB, env, tx map[string]string) ([]byte, *big.Int, error) {
 	var (
 		key   = crypto.ToECDSA(common.Hex2Bytes(tx["secretKey"]))
 		data  = common.FromHex(tx["data"])
@@ -169,7 +170,7 @@ func RunState(statedb *state.StateDB, env, tx map[string]string) ([]byte, *big.I
 	vmenv := NewEnvFromMap(statedb, env, tx)
 	vmenv.origin = crypto.PubkeyToAddress(key.PublicKey)
 	ret, _, err := kbpool.ApplyMessage(vmenv, message, coinbase)
-	if block_error.IsNonceErr(err) || block_error.IsInvalidTxErr(err) || state.IsGasLimitErr(err) {
+	if block_error.IsNonceErr(err) || block_error.IsInvalidTxErr(err) || state2.IsGasLimitErr(err) {
 		statedb.Set(snapshot)
 	}
 	statedb.SyncObjects()

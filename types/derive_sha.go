@@ -2,9 +2,9 @@ package types
 
 import (
 	"github.com/MonteCarloClub/KBD/common"
-	"github.com/MonteCarloClub/KBD/kdb"
+	"github.com/MonteCarloClub/KBD/model/kdb"
+	"github.com/MonteCarloClub/KBD/model/trie"
 	"github.com/MonteCarloClub/KBD/rlp"
-	"github.com/MonteCarloClub/KBD/trie"
 )
 
 type DerivableList interface {

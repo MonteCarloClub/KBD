@@ -2,7 +2,7 @@ package model
 
 import (
 	"github.com/MonteCarloClub/KBD/kitex_gen/api"
-	"github.com/MonteCarloClub/KBD/state"
+	"github.com/MonteCarloClub/KBD/model/state"
 )
 
 func StateObject2VO(obj *state.StateObject) *api.Account {

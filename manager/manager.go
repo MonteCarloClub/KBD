@@ -1,11 +1,11 @@
 package manager
 
 import (
-	"github.com/MonteCarloClub/KBD/accounts"
 	"github.com/MonteCarloClub/KBD/chain_manager"
 	"github.com/MonteCarloClub/KBD/common"
-	"github.com/MonteCarloClub/KBD/event"
-	"github.com/MonteCarloClub/KBD/kbpool"
+	"github.com/MonteCarloClub/KBD/model/accounts"
+	"github.com/MonteCarloClub/KBD/model/event"
+	"github.com/MonteCarloClub/KBD/model/kbpool"
 	"github.com/MonteCarloClub/KBD/types"
 )
 

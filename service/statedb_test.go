@@ -5,10 +5,11 @@ import (
 	"path"
 	"testing"
 
+	"github.com/MonteCarloClub/KBD/model/kdb"
+	"github.com/MonteCarloClub/KBD/model/state"
+
 	"github.com/MonteCarloClub/KBD/common"
 	"github.com/MonteCarloClub/KBD/constant"
-	"github.com/MonteCarloClub/KBD/kdb"
-	"github.com/MonteCarloClub/KBD/state"
 )
 
 func TestGetAccountData(t *testing.T) {

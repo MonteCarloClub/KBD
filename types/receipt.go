@@ -3,11 +3,12 @@ package types
 import (
 	"bytes"
 	"fmt"
-	"github.com/MonteCarloClub/KBD/common"
-	"github.com/MonteCarloClub/KBD/rlp"
-	"github.com/MonteCarloClub/KBD/state"
 	"io"
 	"math/big"
+
+	"github.com/MonteCarloClub/KBD/common"
+	"github.com/MonteCarloClub/KBD/model/state"
+	"github.com/MonteCarloClub/KBD/rlp"
 )
 
 type Receipt struct {

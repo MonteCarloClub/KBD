@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/MonteCarloClub/KBD/model/state"
+
 	"github.com/MonteCarloClub/KBD/common"
 	"github.com/MonteCarloClub/KBD/manager"
-	"github.com/MonteCarloClub/KBD/state"
 	"github.com/MonteCarloClub/KBD/types"
 )
 
