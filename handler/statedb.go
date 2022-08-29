@@ -17,6 +17,7 @@ func GetAccountData(ctx context.Context, req *api.GetAccountDataRequest) (resp *
 	if req.Address == "" {
 		return nil, fmt.Errorf("wrong account")
 	}
+
 	obj := service.GetAccountData(ctx, req.GetAddress())
 	resp.Account = model.StateObject2VO(obj)
 	klog.CtxInfof(ctx, "[GetAccountData]req = %v,resp = %v", util.ToString(req), util.ToString(resp))

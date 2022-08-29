@@ -4,12 +4,9 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-
-	"github.com/astaxie/beego/logs"
 )
 
 func TestStateSystemOperations(t *testing.T) {
-	logs.SetLogger(logs.AdapterFile, `{"filename":"project.log","level":7,"maxlines":0,"maxsize":0,"daily":true,"maxdays":10}`)
 	fn := filepath.Join(stateTestDir, "stSystemOperationsTest.json")
 	if err := RunStateTest(fn, StateSkipTests); err != nil {
 		t.Error(err)

@@ -5,17 +5,16 @@ import (
 	"fmt"
 	"io"
 	"math/big"
-	"path"
 	"strconv"
 
+	"github.com/MonteCarloClub/KBD/frame"
+
 	"github.com/MonteCarloClub/KBD/model/kbpool"
-	"github.com/MonteCarloClub/KBD/model/kdb"
 	state2 "github.com/MonteCarloClub/KBD/model/state"
 	"github.com/MonteCarloClub/KBD/model/vm"
 
 	"github.com/MonteCarloClub/KBD/block_error"
 	"github.com/MonteCarloClub/KBD/common"
-	"github.com/MonteCarloClub/KBD/constant"
 	"github.com/MonteCarloClub/KBD/crypto"
 	"github.com/cloudwego/kitex/pkg/klog"
 )
@@ -71,12 +70,11 @@ func runStateTests(tests map[string]VmTest, skipTests []string) error {
 }
 
 func runStateTest(test VmTest) error {
-	file := path.Join("/", constant.DataDir, constant.StateDBFile)
-	db, _ := kdb.NewLDBDatabase(file)
-	statedb := state2.New(common.Hash{}, db)
+	frame.Init()
+	stateDB := frame.GetStateDB()
 	for addr, account := range test.Pre {
-		obj := StateObjectFromAccount(db, addr, account)
-		statedb.SetStateObject(obj)
+		obj := StateObjectFromAccount(frame.GetDB(), addr, account)
+		stateDB.SetStateObject(obj)
 		for a, v := range account.Storage {
 			obj.SetState(common.HexToHash(a), common.HexToHash(v))
 		}
@@ -101,7 +99,7 @@ func runStateTest(test VmTest) error {
 		// err  error
 	)
 
-	ret, _, _ = RunState(statedb, env, test.Transaction)
+	ret, _, _ = RunState(stateDB, env, test.Transaction)
 
 	// // Compare expected  and actual return
 	rexp := common.FromHex(test.Out)
@@ -111,11 +109,11 @@ func runStateTest(test VmTest) error {
 
 	// check post state
 	for addr, account := range test.Post {
-		obj := statedb.GetStateObject(common.HexToAddress(addr))
+		obj := stateDB.GetStateObject(common.HexToAddress(addr))
 		if obj == nil {
 			continue
 		}
-		klog.Infof("obj.Balance:%v \t account.Balance:%v", obj.Balance(), common.Big(account.Balance))
+		klog.Infof("address:%v obj.Balance:%v \t account.Balance:%v", obj.Address().Hex(), obj.Balance(), common.Big(account.Balance))
 		if obj.Balance().Cmp(common.Big(account.Balance)) != 0 {
 			return fmt.Errorf("(%x) balance failed. Expected %v, got %v => %v\n", obj.Address().Bytes()[:4], account.Balance, obj.Balance(), new(big.Int).Sub(common.Big(account.Balance), obj.Balance()))
 		}
@@ -134,12 +132,11 @@ func runStateTest(test VmTest) error {
 		}
 	}
 
-	statedb.Sync()
-	if common.HexToHash(test.PostStateRoot) != statedb.Root() {
-		return fmt.Errorf("Post state root error. Expected %s, got %x", test.PostStateRoot, statedb.Root())
+	stateDB.Sync()
+	if common.HexToHash(test.PostStateRoot) != stateDB.Root() {
+		return fmt.Errorf("Post state root error. Expected %s, got %x", test.PostStateRoot, stateDB.Root())
 	}
-
-	db.Close()
+	frame.GetDB().Close()
 	return nil
 }
 

@@ -1,31 +1,41 @@
 package frame
 
 import (
-	"context"
 	"path"
-
-	"github.com/MonteCarloClub/KBD/model/kdb"
-	"github.com/MonteCarloClub/KBD/model/state"
 
 	"github.com/MonteCarloClub/KBD/common"
 	"github.com/MonteCarloClub/KBD/constant"
+	"github.com/MonteCarloClub/KBD/model/kdb"
+	"github.com/MonteCarloClub/KBD/model/state"
 )
 
-func Init(ctx context.Context) {
-	initStateDB(ctx)
+var stateDB *state.StateDB
+var db *kdb.LDBDatabase
+
+func Init() {
+	initDB()
+	initStateDB()
 }
 
-func initStateDB(ctx context.Context) {
+func initDB() {
 	file := path.Join("/", constant.DataDir, constant.StateDBFile)
-	db, _ := kdb.NewLDBDatabase(file)
-	statedb := state.New(common.Hash{}, db)
-	context.WithValue(ctx, constant.CtxStateDB, statedb)
+	db, _ = kdb.NewLDBDatabase(file)
 }
 
-func GetStateDB(ctx context.Context) *state.StateDB {
-	value := ctx.Value(constant.CtxStateDB)
-	if value != nil {
-		return value.(*state.StateDB)
+func GetDB() *kdb.LDBDatabase {
+	if db == nil {
+		initDB()
 	}
-	return nil
+	return db
+}
+
+func initStateDB() {
+	stateDB = state.New(common.Hash{}, GetDB())
+}
+
+func GetStateDB() *state.StateDB {
+	if stateDB == nil {
+		initStateDB()
+	}
+	return stateDB
 }

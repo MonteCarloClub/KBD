@@ -10,7 +10,7 @@ import (
 )
 
 func GetAccountData(ctx context.Context, address string) *state.StateObject {
-	stateDB := frame.GetStateDB(ctx)
-	obj := stateDB.GetStateObject(common.StringToAddress(address))
+	stateDB := frame.GetStateDB()
+	obj := stateDB.GetStateObject(common.HexToAddress(address))
 	return obj
 }

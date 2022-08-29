@@ -42,7 +42,7 @@ func (self *Cache) Put(key []byte, data []byte) {
 func (self *Cache) Flush() {
 	if db, ok := self.backend.(*kdb.LDBDatabase); ok {
 		if err := db.LDB().Write(self.batch, nil); err != nil {
-			klog.Error("db write err:%v", err)
+			klog.Error("db write err:", err)
 		}
 	} else {
 		for k, v := range self.store {
