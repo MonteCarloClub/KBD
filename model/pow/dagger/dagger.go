@@ -1,7 +1,6 @@
 package dagger
 
 import (
-	"github.com/astaxie/beego/logs"
 	"hash"
 	"math/big"
 	"math/rand"
@@ -9,6 +8,7 @@ import (
 
 	"github.com/MonteCarloClub/KBD/common"
 	"github.com/MonteCarloClub/KBD/crypto/sha3"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type Dagger struct {
@@ -25,7 +25,7 @@ func (dag *Dagger) Find(obj *big.Int, resChan chan int64) {
 		rnd := r.Int63()
 
 		res := dag.Eval(big.NewInt(rnd))
-		logs.Debug("[POW]rnd %v\nres %v\nobj %v\n", rnd, res, obj)
+		klog.Debug("[POW]rnd %v\nres %v\nobj %v\n", rnd, res, obj)
 		if res.Cmp(obj) < 0 {
 			// Post back result on the channel
 			resChan <- rnd

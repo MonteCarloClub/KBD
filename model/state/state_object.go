@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/MonteCarloClub/KBD/model/trie"
-
 	"github.com/MonteCarloClub/KBD/common"
 	"github.com/MonteCarloClub/KBD/crypto"
+	"github.com/MonteCarloClub/KBD/model/trie"
 	"github.com/MonteCarloClub/KBD/rlp"
-	"github.com/astaxie/beego/logs"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type Code []byte
@@ -113,7 +112,7 @@ func (self *StateObject) MarkForDeletion() {
 	self.remove = true
 	self.dirty = true
 
-	logs.Debug("%x: #%d %v X\n", self.Address(), self.nonce, self.balance)
+	klog.Debug("%x: #%d %v X\n", self.Address(), self.nonce, self.balance)
 }
 
 func (c *StateObject) getAddr(addr common.Hash) common.Hash {
@@ -176,13 +175,13 @@ func (c *StateObject) GetInstr(pc *big.Int) *common.Value {
 func (c *StateObject) AddBalance(amount *big.Int) {
 	c.SetBalance(new(big.Int).Add(c.balance, amount))
 
-	logs.Debug("%x: #%d %v (+ %v)\n", c.Address(), c.nonce, c.balance, amount)
+	klog.Debug("%x: #%d %v (+ %v)\n", c.Address(), c.nonce, c.balance, amount)
 }
 
 func (c *StateObject) SubBalance(amount *big.Int) {
 	c.SetBalance(new(big.Int).Sub(c.balance, amount))
 
-	logs.Debug("%x: #%d %v (- %v)\n", c.Address(), c.nonce, c.balance, amount)
+	klog.Debug("%x: #%d %v (- %v)\n", c.Address(), c.nonce, c.balance, amount)
 }
 
 func (c *StateObject) SetBalance(amount *big.Int) {
@@ -204,7 +203,7 @@ func (c *StateObject) ReturnGas(gas, price *big.Int) {}
 func (self *StateObject) SetGasLimit(gasLimit *big.Int) {
 	self.gasPool = new(big.Int).Set(gasLimit)
 
-	logs.Debug("%x: gas (+ %v)", self.Address(), self.gasPool)
+	klog.Debug("%x: gas (+ %v)", self.Address(), self.gasPool)
 }
 
 func (self *StateObject) SubGas(gas, price *big.Int) error {

@@ -18,7 +18,6 @@ import (
 	"github.com/MonteCarloClub/KBD/metrics"
 	"github.com/MonteCarloClub/KBD/rlp"
 	"github.com/MonteCarloClub/KBD/types"
-	"github.com/astaxie/beego/logs"
 	"github.com/cloudwego/kitex/pkg/klog"
 	lru "github.com/hashicorp/golang-lru"
 )
@@ -345,7 +344,7 @@ func (bc *ChainManager) write(block *types.Block) {
 	if err != nil {
 		klog.Error("db write fail:%v", err)
 	}
-	logs.Debug("wrote block #%v %s. Took %v\n", block.Number(), common.PP(block.Hash().Bytes()), time.Since(tstart))
+	klog.Debug("wrote block #%v %s. Took %v\n", block.Number(), common.PP(block.Hash().Bytes()), time.Since(tstart))
 }
 
 // Accessors
@@ -618,7 +617,7 @@ func (self *ChainManager) InsertChain(chain types.Blocks) (int, error) {
 		}
 		switch status {
 		case CanonStatTy:
-			logs.Debug("[%v] inserted block #%d (%d TXs %d UNCs) (%x...). Took %v\n", time.Now().UnixNano(), block.Number(), len(block.Transactions()), len(block.Uncles()), block.Hash().Bytes()[0:4], time.Since(bstart))
+			klog.Debug("[%v] inserted block #%d (%d TXs %d UNCs) (%x...). Took %v\n", time.Now().UnixNano(), block.Number(), len(block.Transactions()), len(block.Uncles()), block.Hash().Bytes()[0:4], time.Since(bstart))
 			queue[i] = ChainEvent{block, block.Hash()}
 			queueEvent.canonicalCount++
 
@@ -627,7 +626,7 @@ func (self *ChainManager) InsertChain(chain types.Blocks) (int, error) {
 			// store the receipts
 			PutReceipts(self.extraDb, receipts)
 		case SideStatTy:
-			logs.Debug("inserted forked block #%d (TD=%v) (%d TXs %d UNCs) (%x...). Took %v\n", block.Number(), block.Difficulty(), len(block.Transactions()), len(block.Uncles()), block.Hash().Bytes()[0:4], time.Since(bstart))
+			klog.Debug("inserted forked block #%d (TD=%v) (%d TXs %d UNCs) (%x...). Took %v\n", block.Number(), block.Difficulty(), len(block.Transactions()), len(block.Uncles()), block.Hash().Bytes()[0:4], time.Since(bstart))
 			queue[i] = ChainSideEvent{block}
 			queueEvent.sideCount++
 		case SplitStatTy:
@@ -640,7 +639,7 @@ func (self *ChainManager) InsertChain(chain types.Blocks) (int, error) {
 	if stats.queued > 0 || stats.processed > 0 || stats.ignored > 0 {
 		tend := time.Since(tstart)
 		start, end := chain[0], chain[len(chain)-1]
-		logs.Debug("imported %d block(s) (%d queued %d ignored) including %d txs in %v. #%v [%x / %x]\n", stats.processed, stats.queued, stats.ignored, txcount, tend, end.Number(), start.Hash().Bytes()[:4], end.Hash().Bytes()[:4])
+		klog.Debug("imported %d block(s) (%d queued %d ignored) including %d txs in %v. #%v [%x / %x]\n", stats.processed, stats.queued, stats.ignored, txcount, tend, end.Number(), start.Hash().Bytes()[:4], end.Hash().Bytes()[:4])
 	}
 
 	go self.eventMux.Post(queueEvent)
@@ -694,7 +693,7 @@ func (self *ChainManager) diff(oldBlock, newBlock *types.Block) (types.Blocks, e
 	}
 
 	commonHash := commonBlock.Hash()
-	logs.Debug("Chain split detected @ %x. Reorganising chain from #%v %x to %x", commonHash[:4], numSplit, oldStart.Hash().Bytes()[:4], newStart.Hash().Bytes()[:4])
+	klog.Debug("Chain split detected @ %x. Reorganising chain from #%v %x to %x", commonHash[:4], numSplit, oldStart.Hash().Bytes()[:4], newStart.Hash().Bytes()[:4])
 
 	return newChain, nil
 }
@@ -750,7 +749,7 @@ out:
 func blockErr(block *types.Block, err error) {
 	h := block.Header()
 	klog.Error("Bad block #%v (%x)\n err:%v", h.Number, h.Hash().Bytes(), err)
-	logs.Debug("%v", verifyNonces)
+	klog.Debug("%v", verifyNonces)
 }
 
 type nonceResult struct {

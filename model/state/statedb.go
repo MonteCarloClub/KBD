@@ -9,10 +9,9 @@ import (
 	"bytes"
 	"math/big"
 
-	"github.com/MonteCarloClub/KBD/model/trie"
-
 	"github.com/MonteCarloClub/KBD/common"
-	"github.com/astaxie/beego/logs"
+	"github.com/MonteCarloClub/KBD/model/trie"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 // StateDBs within the ethereum protocol are used to store anything
@@ -229,7 +228,7 @@ func (self *StateDB) GetOrNewStateObject(addr common.Address) *StateObject {
 
 // NewStateObject create a state object whether it exist in the trie or not
 func (self *StateDB) newStateObject(addr common.Address) *StateObject {
-	logs.Debug("(+) %x\n", addr)
+	klog.Debug("(+) %x\n", addr)
 
 	stateObject := NewStateObject(addr, self.db)
 	self.stateObjects[addr.Str()] = stateObject

@@ -9,7 +9,6 @@ import (
 	"github.com/MonteCarloClub/KBD/common"
 	"github.com/MonteCarloClub/KBD/rlp"
 	"github.com/MonteCarloClub/KBD/types"
-	"github.com/astaxie/beego/logs"
 	"github.com/cloudwego/kitex/pkg/klog"
 )
 
@@ -46,8 +45,8 @@ func ReportBlock(block *types.Block, err error) {
 		return
 	}
 	defer resp.Body.Close()
-	logs.Debug("response Status:%v", resp.Status)
-	logs.Debug("response Headers:%v", resp.Header)
+	klog.Debug("response Status:%v", resp.Status)
+	klog.Debug("response Headers:%v", resp.Header)
 	body, _ := ioutil.ReadAll(resp.Body)
-	logs.Debug("response Body:%v", string(body))
+	klog.Debug("response Body:%v", string(body))
 }
