@@ -73,6 +73,7 @@ func runStateTest(test VmTest) error {
 	frame.Init()
 	stateDB := frame.GetStateDB()
 	for addr, account := range test.Pre {
+		klog.Infof("runStateTest addr = %v , account = %v", addr, account)
 		obj := StateObjectFromAccount(frame.GetDB(), addr, account)
 		stateDB.SetStateObject(obj)
 		for a, v := range account.Storage {

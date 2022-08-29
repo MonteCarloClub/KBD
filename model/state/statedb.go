@@ -207,7 +207,6 @@ func (self *StateDB) GetStateObject(addr common.Address) *StateObject {
 	if len(data) == 0 {
 		return nil
 	}
-
 	stateObject = NewStateObjectFromBytes(addr, []byte(data), self.db)
 	self.SetStateObject(stateObject)
 

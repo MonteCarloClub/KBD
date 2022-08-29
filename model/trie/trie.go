@@ -9,10 +9,10 @@ import (
 	"bytes"
 	"container/list"
 	"fmt"
-	"github.com/MonteCarloClub/KBD/crypto"
 	"sync"
 
 	"github.com/MonteCarloClub/KBD/common"
+	"github.com/MonteCarloClub/KBD/crypto"
 )
 
 func ParanoiaCheck(t1 *Trie, backend Backend) (bool, *Trie) {
@@ -140,7 +140,6 @@ func (self *Trie) Get(key []byte) []byte {
 	defer self.mu.Unlock()
 
 	k := CompactHexDecode(string(key))
-
 	n := self.get(self.root, k)
 	if n != nil {
 		return n.(*ValueNode).Val()
