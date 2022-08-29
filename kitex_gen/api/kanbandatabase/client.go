@@ -14,6 +14,7 @@ type Client interface {
 	GetData(ctx context.Context, req *api.GetDataRequest, callOptions ...callopt.Option) (r *api.GetDataResponse, err error)
 	PutData(ctx context.Context, req *api.PutDataRequest, callOptions ...callopt.Option) (r *api.PutDataResponse, err error)
 	GetAccountData(ctx context.Context, req *api.GetAccountDataRequest, callOptions ...callopt.Option) (r *api.GetAccountDataResponse, err error)
+	SetAccountData(ctx context.Context, req *api.SetAccountDataRequest, callOptions ...callopt.Option) (r *api.SetAccountDataResponse, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -58,4 +59,9 @@ func (p *kKanBanDatabaseClient) PutData(ctx context.Context, req *api.PutDataReq
 func (p *kKanBanDatabaseClient) GetAccountData(ctx context.Context, req *api.GetAccountDataRequest, callOptions ...callopt.Option) (r *api.GetAccountDataResponse, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.GetAccountData(ctx, req)
+}
+
+func (p *kKanBanDatabaseClient) SetAccountData(ctx context.Context, req *api.SetAccountDataRequest, callOptions ...callopt.Option) (r *api.SetAccountDataResponse, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.SetAccountData(ctx, req)
 }

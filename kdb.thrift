@@ -32,8 +32,22 @@ struct GetAccountDataResponse {
     2: optional Account account
 }
 
+struct SetAccountDataRequest {
+    1: required string address
+    2: optional string balance
+    3: optional string code
+    4: optional string nonce
+    5: optional map<string,string> Storage
+}
+
+struct SetAccountDataResponse {
+    1: required string message
+    2: required bool success
+}
+
 service kanBanDatabase {
     GetDataResponse GetData(1: GetDataRequest req)
     PutDataResponse PutData(1: PutDataRequest req)
     GetAccountDataResponse GetAccountData(1:  GetAccountDataRequest req)
+    SetAccountDataResponse SetAccountData(1:  SetAccountDataRequest req)
 }

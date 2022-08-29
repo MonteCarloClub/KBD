@@ -23,3 +23,13 @@ func GetAccountData(ctx context.Context, req *api.GetAccountDataRequest) (resp *
 	klog.CtxInfof(ctx, "[GetAccountData]req = %v,resp = %v", util.ToString(req), util.ToString(resp))
 	return resp, nil
 }
+
+// SetAccountData implements the KanBanDatabaseImpl interface.
+func SetAccountData(ctx context.Context, req *api.SetAccountDataRequest) (resp *api.SetAccountDataResponse, err error) {
+	resp = &api.SetAccountDataResponse{}
+	if req.Address == "" {
+		return nil, fmt.Errorf("wrong account")
+	}
+	resp.Success = service.SetAccountData(ctx, req)
+	return resp, nil
+}

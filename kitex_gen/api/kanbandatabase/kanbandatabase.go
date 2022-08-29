@@ -22,6 +22,7 @@ func NewServiceInfo() *kitex.ServiceInfo {
 		"GetData":        kitex.NewMethodInfo(getDataHandler, newKanBanDatabaseGetDataArgs, newKanBanDatabaseGetDataResult, false),
 		"PutData":        kitex.NewMethodInfo(putDataHandler, newKanBanDatabasePutDataArgs, newKanBanDatabasePutDataResult, false),
 		"GetAccountData": kitex.NewMethodInfo(getAccountDataHandler, newKanBanDatabaseGetAccountDataArgs, newKanBanDatabaseGetAccountDataResult, false),
+		"SetAccountData": kitex.NewMethodInfo(setAccountDataHandler, newKanBanDatabaseSetAccountDataArgs, newKanBanDatabaseSetAccountDataResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName": "api",
@@ -91,6 +92,24 @@ func newKanBanDatabaseGetAccountDataResult() interface{} {
 	return api.NewKanBanDatabaseGetAccountDataResult()
 }
 
+func setAccountDataHandler(ctx context.Context, handler interface{}, arg, result interface{}) error {
+	realArg := arg.(*api.KanBanDatabaseSetAccountDataArgs)
+	realResult := result.(*api.KanBanDatabaseSetAccountDataResult)
+	success, err := handler.(api.KanBanDatabase).SetAccountData(ctx, realArg.Req)
+	if err != nil {
+		return err
+	}
+	realResult.Success = success
+	return nil
+}
+func newKanBanDatabaseSetAccountDataArgs() interface{} {
+	return api.NewKanBanDatabaseSetAccountDataArgs()
+}
+
+func newKanBanDatabaseSetAccountDataResult() interface{} {
+	return api.NewKanBanDatabaseSetAccountDataResult()
+}
+
 type kClient struct {
 	c client.Client
 }
@@ -126,6 +145,16 @@ func (p *kClient) GetAccountData(ctx context.Context, req *api.GetAccountDataReq
 	_args.Req = req
 	var _result api.KanBanDatabaseGetAccountDataResult
 	if err = p.c.Call(ctx, "GetAccountData", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) SetAccountData(ctx context.Context, req *api.SetAccountDataRequest) (r *api.SetAccountDataResponse, err error) {
+	var _args api.KanBanDatabaseSetAccountDataArgs
+	_args.Req = req
+	var _result api.KanBanDatabaseSetAccountDataResult
+	if err = p.c.Call(ctx, "SetAccountData", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

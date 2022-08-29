@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+
 	"github.com/MonteCarloClub/KBD/handler"
 	"github.com/MonteCarloClub/KBD/kitex_gen/api"
 )
@@ -22,4 +23,9 @@ func (s *KanBanDatabaseImpl) PutData(ctx context.Context, req *api.PutDataReques
 // GetAccountData implements the KanBanDatabaseImpl interface.
 func (s *KanBanDatabaseImpl) GetAccountData(ctx context.Context, req *api.GetAccountDataRequest) (resp *api.GetAccountDataResponse, err error) {
 	return handler.GetAccountData(ctx, req)
+}
+
+// SetAccountData implements the KanBanDatabaseImpl interface.
+func (s *KanBanDatabaseImpl) SetAccountData(ctx context.Context, req *api.SetAccountDataRequest) (resp *api.SetAccountDataResponse, err error) {
+	return handler.SetAccountData(ctx, req)
 }
