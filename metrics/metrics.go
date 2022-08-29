@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/astaxie/beego/logs"
+	"github.com/cloudwego/kitex/pkg/klog"
 	"github.com/rcrowley/go-metrics"
 )
 
@@ -23,7 +24,7 @@ var enabled = false
 func init() {
 	for _, arg := range os.Args {
 		if strings.TrimLeft(arg, "-") == MetricsEnabledFlag {
-			logs.Info("Enabling metrics collection")
+			klog.Infof("Enabling metrics collection")
 			enabled = true
 		}
 	}

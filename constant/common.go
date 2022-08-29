@@ -1,5 +1,11 @@
 package constant
 
-const DBFile = "ldbtmpfile"
+const (
+	StateDBFile = "StateDB"
+	BlockDBFile = "BlockDB"
+	ExtraDBFile = "ExtraDB"
+	NodeDBFile  = "NodeDB"
+	LogFile     = "log.txt"
+)
 
-const DBDir = "/tmp"
+const DataDir = "/tmp"

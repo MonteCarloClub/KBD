@@ -2,9 +2,6 @@ package chain_manager
 
 import (
 	"fmt"
-	. "github.com/MonteCarloClub/KBD/block_error"
-	"github.com/MonteCarloClub/KBD/metrics"
-	"github.com/astaxie/beego/logs"
 	"io"
 	"math/big"
 	"runtime"
@@ -12,13 +9,17 @@ import (
 	"sync/atomic"
 	"time"
 
+	. "github.com/MonteCarloClub/KBD/block_error"
 	"github.com/MonteCarloClub/KBD/common"
 	"github.com/MonteCarloClub/KBD/event"
+	"github.com/MonteCarloClub/KBD/metrics"
 	"github.com/MonteCarloClub/KBD/pow"
 	"github.com/MonteCarloClub/KBD/rlp"
 	"github.com/MonteCarloClub/KBD/state"
 	"github.com/MonteCarloClub/KBD/types"
-	"github.com/hashicorp/golang-lru"
+	"github.com/astaxie/beego/logs"
+	"github.com/cloudwego/kitex/pkg/klog"
+	lru "github.com/hashicorp/golang-lru"
 )
 
 var (
@@ -91,7 +92,7 @@ func NewChainManager(genesis *types.Block, blockDb, stateDb, extraDb common.Data
 	// Check the current state of the block hashes and make sure that we do not have any of the bad blocks in our chain
 	for hash, _ := range BadHashes {
 		if block := bc.GetBlock(hash); block != nil {
-			logs.Info("Found bad hash. Reorganising chain to state %x\n", block.ParentHash().Bytes()[:4])
+			klog.Infof("Found bad hash. Reorganising chain to state %x\n", block.ParentHash().Bytes()[:4])
 			block = bc.GetBlock(block.ParentHash())
 			if block == nil {
 				logs.Error("Unable to complete. Parent block not found. Corrupted DB?")
@@ -214,11 +215,11 @@ func (bc *ChainManager) setLastState() {
 			bc.currentBlock = block
 			bc.lastBlockHash = block.Hash()
 		} else {
-			logs.Info("LastBlock (%x) not found. Recovering...\n", data)
+			klog.Infof("LastBlock (%x) not found. Recovering...\n", data)
 			if bc.recover() {
-				logs.Info("Recover successful")
+				klog.Infof("Recover successful")
 			} else {
-				logs.Info("Recover failed. Please report")
+				klog.Infof("Recover failed. Please report")
 			}
 		}
 	} else {
@@ -226,7 +227,7 @@ func (bc *ChainManager) setLastState() {
 	}
 	bc.td = bc.currentBlock.Td
 	bc.currentGasLimit = CalcGasLimit(bc.currentBlock)
-	logs.Info("Last block (#%v) %x TD=%v\n", bc.currentBlock.Number(), bc.currentBlock.Hash(), bc.td)
+	klog.Infof("Last block (#%v) %x TD=%v\n", bc.currentBlock.Number(), bc.currentBlock.Hash(), bc.td)
 }
 
 func (bc *ChainManager) makeCache() {
@@ -296,7 +297,7 @@ func (self *ChainManager) ExportN(w io.Writer, first uint64, last uint64) error 
 		return fmt.Errorf("export failed: first (%d) is greater than last (%d)", first, last)
 	}
 
-	logs.Info("exporting %d blocks...\n", last-first+1)
+	klog.Infof("exporting %d blocks...\n", last-first+1)
 
 	for nr := first; nr <= last; nr++ {
 		block := self.GetBlockByNumber(nr)
@@ -445,7 +446,7 @@ func (bc *ChainManager) Stop() {
 
 	bc.wg.Wait()
 
-	logs.Info("Chain manager stopped")
+	klog.Infof("Chain manager stopped")
 }
 
 type queueEvent struct {
@@ -546,7 +547,7 @@ func (self *ChainManager) InsertChain(chain types.Blocks) (int, error) {
 	txcount := 0
 	for i, block := range chain {
 		if atomic.LoadInt32(&self.procInterrupt) == 1 {
-			logs.Info("Premature abort during chain processing")
+			klog.Infof("Premature abort during chain processing")
 			break
 		}
 

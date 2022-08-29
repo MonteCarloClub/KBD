@@ -1,9 +1,11 @@
 package kdb
 
 import (
-	"github.com/astaxie/beego/logs"
 	"sync"
 	"time"
+
+	"github.com/astaxie/beego/logs"
+	"github.com/cloudwego/kitex/pkg/klog"
 
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
@@ -110,7 +112,7 @@ func (self *LDBDatabase) Flush() error {
 func (self *LDBDatabase) Close() {
 	self.quit <- struct{}{}
 	<-self.quit
-	logs.Info("flushed and closed db:%v", self.fn)
+	klog.Infof("flushed and closed db:%v", self.fn)
 }
 
 func (self *LDBDatabase) update() {

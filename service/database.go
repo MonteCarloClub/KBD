@@ -11,7 +11,7 @@ import (
 
 // GetData implements the KanBanDatabaseImpl interface.
 func GetData(ctx context.Context, req *api.GetDataRequest) (valuse []byte, err error) {
-	file := path.Join("/", constant.DBDir, constant.DBFile)
+	file := path.Join("/", constant.DataDir, constant.StateDBFile)
 	db, _ := kdb.NewLDBDatabase(file)
 	defer db.Close()
 	return db.Get([]byte(req.Key))
@@ -19,7 +19,7 @@ func GetData(ctx context.Context, req *api.GetDataRequest) (valuse []byte, err e
 
 // PutData implements the KanBanDatabaseImpl interface.
 func PutData(ctx context.Context, req *api.PutDataRequest) (err error) {
-	file := path.Join("/", constant.DBDir, constant.DBFile)
+	file := path.Join("/", constant.DataDir, constant.StateDBFile)
 	db, _ := kdb.NewLDBDatabase(file)
 	defer db.Close()
 	err = db.Put([]byte(req.Key), []byte(req.Value))

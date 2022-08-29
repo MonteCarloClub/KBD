@@ -11,7 +11,7 @@ import (
 )
 
 func TestNewDb(t *testing.T) {
-	file := path.Join("/", constant.DBDir, constant.DBFile)
+	file := path.Join("/", constant.DataDir, constant.StateDBFile)
 	if common.FileExist(file) {
 		os.RemoveAll(file)
 	}

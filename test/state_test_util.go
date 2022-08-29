@@ -16,7 +16,7 @@ import (
 	"github.com/MonteCarloClub/KBD/kdb"
 	"github.com/MonteCarloClub/KBD/state"
 	"github.com/MonteCarloClub/KBD/vm"
-	"github.com/astaxie/beego/logs"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 func RunStateTestWithReader(r io.Reader, skipTests []string) error {
@@ -54,7 +54,7 @@ func runStateTests(tests map[string]VmTest, skipTests []string) error {
 
 	for name, test := range tests {
 		if skipTest[name] {
-			logs.Info("Skipping state test %v", name)
+			klog.Infof("Skipping state test %v", name)
 			return nil
 		}
 
@@ -62,7 +62,7 @@ func runStateTests(tests map[string]VmTest, skipTests []string) error {
 			return fmt.Errorf("%s: %s\n", name, err.Error())
 		}
 
-		logs.Info("State test passed: %v", name)
+		klog.Infof("State test passed: %v", name)
 		//fmt.Println(string(statedb.Dump()))
 	}
 	return nil
@@ -70,7 +70,7 @@ func runStateTests(tests map[string]VmTest, skipTests []string) error {
 }
 
 func runStateTest(test VmTest) error {
-	file := path.Join("/", constant.DBDir, constant.DBFile)
+	file := path.Join("/", constant.DataDir, constant.StateDBFile)
 	db, _ := kdb.NewLDBDatabase(file)
 	statedb := state.New(common.Hash{}, db)
 	for addr, account := range test.Pre {
@@ -114,7 +114,7 @@ func runStateTest(test VmTest) error {
 		if obj == nil {
 			continue
 		}
-		logs.Info(obj.Balance(), " \t", common.Big(account.Balance))
+		klog.Infof("obj.Balance:%v \t account.Balance:%v", obj.Balance(), common.Big(account.Balance))
 		if obj.Balance().Cmp(common.Big(account.Balance)) != 0 {
 			return fmt.Errorf("(%x) balance failed. Expected %v, got %v => %v\n", obj.Address().Bytes()[:4], account.Balance, obj.Balance(), new(big.Int).Sub(common.Big(account.Balance), obj.Balance()))
 		}

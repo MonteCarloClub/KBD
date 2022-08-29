@@ -8,10 +8,12 @@ package kbpool
 import (
 	"errors"
 	"fmt"
-	"github.com/astaxie/beego/logs"
 	"math/big"
 	"sort"
 	"sync"
+
+	"github.com/astaxie/beego/logs"
+	"github.com/cloudwego/kitex/pkg/klog"
 
 	"github.com/MonteCarloClub/KBD/common"
 	"github.com/MonteCarloClub/KBD/event"
@@ -123,7 +125,7 @@ func (pool *TxPool) resetState() {
 func (pool *TxPool) Stop() {
 	close(pool.quit)
 	pool.events.Unsubscribe()
-	logs.Info("TX Pool stopped")
+	klog.Infof("TX Pool stopped")
 }
 
 func (pool *TxPool) State() *state.ManagedState {
@@ -225,7 +227,7 @@ func (self *TxPool) add(tx *types.Transaction) error {
 	// verified in ValidateTransaction.
 	f, _ := tx.From()
 	from := common.Bytes2Hex(f[:4])
-	logs.Info("(t) %x => %s (%v) %x\n", from, toname, tx.Value(), hash)
+	klog.Infof("(t) %x => %s (%v) %x\n", from, toname, tx.Value(), hash)
 
 	return nil
 }
@@ -278,7 +280,7 @@ func (self *TxPool) AddTransactions(txs []*types.Transaction) {
 			logs.Error("tx error:", err)
 		} else {
 			h := tx.Hash()
-			logs.Info("tx %x\n", h[:4])
+			klog.Infof("tx %x\n", h[:4])
 		}
 	}
 
@@ -396,7 +398,7 @@ func (pool *TxPool) checkQueue() {
 
 			if e.Nonce() > guessedNonce {
 				if len(addq)-i > maxQueued {
-					logs.Info("Queued tx limit exceeded for %s. Tx %s removed\n", common.PP(address[:]), common.PP(e.hash[:]))
+					klog.Infof("Queued tx limit exceeded for %s. Tx %s removed\n", common.PP(address[:]), common.PP(e.hash[:]))
 					for j := i + maxQueued; j < len(addq); j++ {
 						delete(txs, addq[j].hash)
 					}
@@ -420,7 +422,7 @@ func (pool *TxPool) validatePool() {
 		from, _ := tx.From() // err already checked
 		// perform light nonce validation
 		if state.GetNonce(from) > tx.Nonce() {
-			logs.Info("removed tx (%x) from pool: low tx nonce\n", hash[:4])
+			klog.Infof("removed tx (%x) from pool: low tx nonce\n", hash[:4])
 			delete(pool.pending, hash)
 		}
 	}

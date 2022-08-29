@@ -2,10 +2,11 @@ package handler
 
 import (
 	"context"
+
 	"github.com/MonteCarloClub/KBD/kitex_gen/api"
 	"github.com/MonteCarloClub/KBD/service"
 	"github.com/MonteCarloClub/KBD/util"
-	"github.com/astaxie/beego/logs"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 // GetData implements the KanBanDatabaseImpl interface.
@@ -16,7 +17,7 @@ func GetData(ctx context.Context, req *api.GetDataRequest) (resp *api.GetDataRes
 		return resp, err
 	}
 	resp.Value = string(value)
-	logs.Info("[GetData]req = %v,resp = %v", util.ToString(req), util.ToString(resp))
+	klog.Infof("[GetData]req = %v,resp = %v", util.ToString(req), util.ToString(resp))
 	return resp, nil
 }
 
@@ -27,6 +28,6 @@ func PutData(ctx context.Context, req *api.PutDataRequest) (resp *api.PutDataRes
 	if err == nil {
 		resp.Success = true
 	}
-	logs.Info("[GetData]req = %v,resp = %v", util.ToString(req), util.ToString(resp))
+	klog.Infof("[GetData]req = %v,resp = %v", util.ToString(req), util.ToString(resp))
 	return resp, err
 }
