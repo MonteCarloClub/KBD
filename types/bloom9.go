@@ -1,11 +1,11 @@
 package types
 
 import (
-	"github.com/MonteCarloClub/KBD/crypto"
 	"math/big"
 
 	"github.com/MonteCarloClub/KBD/common"
-	"github.com/MonteCarloClub/KBD/state"
+	"github.com/MonteCarloClub/KBD/crypto"
+	"github.com/MonteCarloClub/KBD/model/state"
 )
 
 type bytesBacked interface {
