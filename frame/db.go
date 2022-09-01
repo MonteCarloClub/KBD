@@ -30,7 +30,7 @@ func GetDB() *kdb.LDBDatabase {
 }
 
 func initStateDB() {
-	stateDB = state.New(common.Hash{}, GetDB())
+	stateDB = state.New(common.Hash{31, 201, 87, 101, 23, 89, 84, 129, 135, 164, 77, 141, 1, 242, 108, 199, 216, 127, 167, 134, 81, 152, 56, 213, 89, 118, 4, 212, 140, 185, 223, 175}, GetDB())
 }
 
 func GetStateDB() *state.StateDB {

@@ -50,7 +50,6 @@ func (self *Cache) Flush() {
 		}
 	}
 }
-
 func (self *Cache) Copy() *Cache {
 	cache := NewCache(self.backend)
 	for k, v := range self.store {

@@ -16,7 +16,8 @@ func TestPutAccountData(t *testing.T) {
 	nonce := "0x00"
 	obj := StateObjectFromAccount(frame.GetDB(), address, balance, code, nonce)
 	stateDB.UpdateStateObject(obj)
-	stateDB.Trie().Commit()
+	stateDB.Sync()
+	frame.GetDB().Flush()
 	res := stateDB.GetStateObject(address)
 	fmt.Println(res)
 }

@@ -16,11 +16,15 @@ func TestNewDb(t *testing.T) {
 		os.RemoveAll(file)
 	}
 	db, _ := NewLDBDatabase(file)
-	db.Put([]byte("dfdsaf"), []byte("asdjkfghkl;awes"))
+	db.Put([]byte("dfdsaf"), []byte("asdfgasdfg"))
 	res, err := db.Get([]byte("dfdsaf"))
 	fmt.Println(string(res), err)
-	db.Close()
-	db, _ = NewLDBDatabase(file)
-	res, err = db.Get([]byte("dfdsaf"))
+
+}
+
+func TestDBGet(t *testing.T) {
+	file := path.Join("/", constant.DataDir, constant.StateDBFile)
+	db, _ := NewLDBDatabase(file)
+	res, err := db.Get([]byte("dfdsaf"))
 	fmt.Println(string(res), err)
 }
