@@ -17,6 +17,7 @@ func SetAccountData(ctx context.Context, req *api.SetAccountDataRequest) bool {
 	obj := StateObjectFromAccount(frame.GetDB(), address, req.GetBalance(), req.GetCode(), req.GetNonce())
 	stateDB.Trie().Commit()
 	stateDB.UpdateStateObject(obj)
+	frame.PutRoot(stateDB.Trie().Hash())
 	return true
 }
 

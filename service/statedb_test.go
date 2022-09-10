@@ -28,7 +28,7 @@ func TestPutAccountData(t *testing.T) {
 
 func TestGetAccountData(t *testing.T) {
 	stateDB := frame.GetState()
-	address := common.HexToAddress("0x945304eb96065b2a98b57a48a06ae28d285a71b4")
+	address := common.HexToAddress("0xa94f5374fce5edbc8e2a8697c15331677e6ebf0b")
 	res := stateDB.GetStateObject(address)
 	fmt.Println(res)
 }
