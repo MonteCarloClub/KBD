@@ -4,12 +4,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/MonteCarloClub/KBD/compression/rle"
 	"github.com/cloudwego/kitex/pkg/klog"
-
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/iterator"
-
-	"github.com/MonteCarloClub/KBD/compression/rle"
 )
 
 type LDBDatabase struct {
@@ -46,9 +44,9 @@ func (self *LDBDatabase) makeQueue() {
 }
 
 func (self *LDBDatabase) Put(key []byte, value []byte) error {
+	klog.Infof("[Put] key = %v value = %v", key, value)
 	self.mu.Lock()
 	defer self.mu.Unlock()
-
 	self.queue[string(key)] = value
 	return nil
 }
@@ -56,7 +54,7 @@ func (self *LDBDatabase) Put(key []byte, value []byte) error {
 func (self *LDBDatabase) Get(key []byte) ([]byte, error) {
 	self.mu.Lock()
 	defer self.mu.Unlock()
-
+	klog.Infof("[Get] key = %v", key)
 	// Check queue first
 	if dat, ok := self.queue[string(key)]; ok {
 		return dat, nil
@@ -66,7 +64,8 @@ func (self *LDBDatabase) Get(key []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	res, err := rle.Decompress(dat)
+	klog.Infof("[Get] key = %v value = %v", key, res)
 	return rle.Decompress(dat)
 }
 
@@ -97,15 +96,21 @@ func (self *LDBDatabase) NewIterator() iterator.Iterator {
 func (self *LDBDatabase) Flush() error {
 	self.mu.Lock()
 	defer self.mu.Unlock()
-
 	batch := new(leveldb.Batch)
 
 	for key, value := range self.queue {
+		resKey := []byte(key)
+		klog.Infof("[Flush] key = %v value = %v", resKey, value)
 		batch.Put([]byte(key), rle.Compress(value))
 	}
 	self.makeQueue() // reset the queue
 
 	return self.db.Write(batch, nil)
+}
+func (self *LDBDatabase) FlushBatch(batch *leveldb.Batch) error {
+	klog.Infof("FlushBatch batch = %v", batch)
+	err := self.db.Write(batch, nil)
+	return err
 }
 
 func (self *LDBDatabase) Close() {

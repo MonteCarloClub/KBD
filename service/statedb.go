@@ -12,7 +12,7 @@ import (
 )
 
 func SetAccountData(ctx context.Context, req *api.SetAccountDataRequest) bool {
-	stateDB := frame.GetStateDB()
+	stateDB := frame.GetState()
 	address := common.HexToAddress(req.Address)
 	obj := StateObjectFromAccount(frame.GetDB(), address, req.GetBalance(), req.GetCode(), req.GetNonce())
 	stateDB.Trie().Commit()
@@ -21,7 +21,7 @@ func SetAccountData(ctx context.Context, req *api.SetAccountDataRequest) bool {
 }
 
 func GetAccountData(ctx context.Context, address string) *state.StateObject {
-	stateDB := frame.GetStateDB()
+	stateDB := frame.GetState()
 	obj := stateDB.GetStateObject(common.HexToAddress(address))
 	return obj
 }

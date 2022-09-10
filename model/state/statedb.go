@@ -310,9 +310,7 @@ func (s *StateDB) Sync() {
 	for _, stateObject := range s.stateObjects {
 		stateObject.trie.Commit()
 	}
-
 	s.trie.Commit()
-
 	s.Empty()
 }
 
