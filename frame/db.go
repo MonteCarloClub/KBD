@@ -21,9 +21,10 @@ func Init() {
 	initBlock()
 }
 
-func initBlock() {
+func initBlock() (err error) {
 	file := path.Join("/", constant.DataDir, constant.BlockDBFile)
-	blockDB, _ = kdb.NewLDBDatabase(file)
+	blockDB, err = kdb.NewLDBDatabase(file)
+	return err
 }
 
 func GetRoot() []byte {
@@ -41,11 +42,16 @@ func GetRoot() []byte {
 }
 func PutRoot(value []byte) {
 	if blockDB == nil {
-		initBlock()
+		err := initBlock()
+		if err != nil {
+			klog.Error("[PutRoot] root init failed")
+			return
+		}
 	}
 	err := blockDB.Put([]byte("root"), value)
 	if err != nil {
-		klog.Info("[PutRoot] put root failed")
+		klog.Error("[PutRoot] put root failed")
+		return
 	}
 	blockDB.Flush()
 	return

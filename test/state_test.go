@@ -2,11 +2,17 @@ package test
 
 import (
 	"os"
+	"path"
 	"path/filepath"
 	"testing"
+
+	"github.com/MonteCarloClub/KBD/constant"
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 func TestStateSystemOperations(t *testing.T) {
+	w, _ := os.OpenFile(path.Join("/", constant.DataDir, constant.LogFile), os.O_WRONLY|os.O_CREATE, 0755)
+	klog.SetOutput(w)
 	fn := filepath.Join(stateTestDir, "stSystemOperationsTest.json")
 	if err := RunStateTest(fn, StateSkipTests); err != nil {
 		t.Error(err)
@@ -14,6 +20,8 @@ func TestStateSystemOperations(t *testing.T) {
 }
 
 func TestStateExample(t *testing.T) {
+	w, _ := os.OpenFile(path.Join("/", constant.DataDir, constant.LogFile), os.O_WRONLY|os.O_CREATE, 0755)
+	klog.SetOutput(w)
 	fn := filepath.Join(stateTestDir, "stExample.json")
 	if err := RunStateTest(fn, StateSkipTests); err != nil {
 		t.Error(err)
@@ -21,6 +29,8 @@ func TestStateExample(t *testing.T) {
 }
 
 func TestStatePreCompiledContracts(t *testing.T) {
+	w, _ := os.OpenFile(path.Join("/", constant.DataDir, constant.LogFile), os.O_WRONLY|os.O_CREATE, 0755)
+	klog.SetOutput(w)
 	fn := filepath.Join(stateTestDir, "stPreCompiledContracts.json")
 	if err := RunStateTest(fn, StateSkipTests); err != nil {
 		t.Error(err)

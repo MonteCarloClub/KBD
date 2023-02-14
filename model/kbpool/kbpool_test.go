@@ -3,7 +3,12 @@ package kbpool
 import (
 	"crypto/ecdsa"
 	"math/big"
+	"os"
+	"path"
 	"testing"
+
+	"github.com/MonteCarloClub/KBD/constant"
+	"github.com/cloudwego/kitex/pkg/klog"
 
 	"github.com/MonteCarloClub/KBD/model/event"
 	"github.com/MonteCarloClub/KBD/model/kdb"
@@ -57,6 +62,8 @@ func TestInvalidTransactions(t *testing.T) {
 }
 
 func TestTransactionQueue(t *testing.T) {
+	w, _ := os.OpenFile(path.Join("/", constant.DataDir, constant.LogFile), os.O_WRONLY|os.O_CREATE, 0755)
+	klog.SetOutput(w)
 	pool, key := setupTxPool()
 	tx := transaction(0, big.NewInt(100), key)
 	from, _ := tx.From()
